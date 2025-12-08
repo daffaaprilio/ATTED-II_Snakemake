@@ -1,9 +1,14 @@
-import os
 configfile: '02_data_prep.yaml'
+
+import os
+import datetime
+
 SPECIES_ID = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']
 NG_WORDS = config['NG_words']
 WDIR = config['wdir']
+
+DATE = datetime.datetime.now().strftime('%Y%m%d')
 
 #------------------------------------------------------------
 # STEP 1: assigning working directory & database path
@@ -62,17 +67,17 @@ rule create_list:
         shuffle = True,
         run_list = True,
         ftp_ddbj = True
-        
     output:
         TAXID_LIST_FILE,
         TAXID_PREFETCH_LIST_FILE
-
+    log:
+        f"{WDIR}/logs/02_data_prep-create_list_{{taxonomy_id}}_{DATE}.txt"
     shell:
-        'python3 {input.cmd} --taxonomy-id {wildcards.taxonomy_id} --database {input.metadataDB} --output {params.wdir} --max-run-in-study {params.max_run_in_study} --min-run-in-study {params.min_run_in_study}'
-        + (' --shuffle' if params.shuffle else '')
-        + (' --run-list' if params.run_list else '')
-        + (' --ftp-ddbj' if params.ftp_ddbj else '')
-
+        '''
+        exec 1> >(tee -a {log}) 2>&1
+        python3 {input.cmd} --taxonomy-id {wildcards.taxonomy_id} --database {input.metadataDB} --output {params.wdir} --max-run-in-study {params.max_run_in_study} --min-run-in-study {params.min_run_in_study} --shuffle --run-list --ftp-ddbj
+        '''
+        
 rule create_study_table:
     input: 
         cmd = 'scripts/0-DataPreparation/2-RNA-seq/x-03-create-srainfo-study.py',
@@ -80,12 +85,15 @@ rule create_study_table:
     params:
         wdir = WDIR,
         taxids = ALL_TAXONOMY_IDS
-    
     output:
         STUDY_TABLE
-    
+    log:
+        f"{WDIR}/logs/02_data_prep-create_study_table_{DATE}.txt"
     shell:
-        'python3 {input.cmd} --database {input.metadataDB} --output-dir {params.wdir} --taxids {params.taxids}'
+        '''
+        exec 1> >(tee -a {log}) 2>&1
+        python3 {input.cmd} --database {input.metadataDB} --output-dir {params.wdir} --taxids {params.taxids}
+        '''
 
 rule check_NG_words:
     input:
@@ -98,9 +106,13 @@ rule check_NG_words:
     output:
         STUDY_TITLE_NG_WORD,
         STUDY_ABSTRACT_NG_WORD
-    
+    log:
+        f"{WDIR}/logs/02_data_prep-check_NG_words_{DATE}.txt"
     shell: 
-        'python3 {input.cmd} --NG_word {params.ng_words} --db {input.metadataDB} --output {params.wdir} --taxids {params.taxids}'
+        '''
+        exec 1> >(tee -a {log}) 2>&1
+        python3 {input.cmd} --NG_word {params.ng_words} --db {input.metadataDB} --output {params.wdir} --taxids {params.taxids}
+        '''
 
 rule blacklist_run:
     input:
@@ -109,12 +121,14 @@ rule blacklist_run:
         study_table = STUDY_TABLE
     params:
         wdir = WDIR,
-
     output:
         BLACKLIST_RUN
-
+    log:
+        f"{WDIR}/logs/02_data_prep-blacklist_run_{DATE}.txt"
     shell:
-        'python3 {input.cmd} --blacklist-study {input.blacklist_study} --study-table-path {input.study_table} --output-dir {params.wdir}'
+        '''
+        exec 1> >(tee -a {log}) 2>&1
+        python3 {input.cmd} --blacklist-study {input.blacklist_study} --study-table-path {input.study_table} --output-dir {params.wdir}'''
         
 rule clean:
     shell: 'rm -rf {ALL_LIST_FILES} {ALL_PREFETCH_LIST_FILES} {STUDY_TABLE} {STUDY_TITLE_NG_WORD} {STUDY_ABSTRACT_NG_WORD} {BLACKLIST_STUDY} {BLACKLIST_RUN}'
