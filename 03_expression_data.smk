@@ -1,6 +1,6 @@
 import os
 
-WDIR = config['wdir']
+WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
 SPECIES_ID = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']
 TAXONOMY_ID_LIST_FILE = f'{WDIR}/list/{TAXONOMY_ID}-list.txt'
@@ -34,7 +34,7 @@ rule all:
 
 rule main:
     output:
-        protected(f"output/{TAXONOMY_ID}/{{acc_id}}.txt")
+        f"output/{TAXONOMY_ID}/{{acc_id}}.txt"
     input:
         cmd = 'scripts/0-DataPreparation/2-RNA-seq/x-31-ftp-bowtie-featureCounts.sh'
     params:
