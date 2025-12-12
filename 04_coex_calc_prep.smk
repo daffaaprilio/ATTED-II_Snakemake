@@ -1,5 +1,5 @@
 
-WDIR = config['wdir']
+WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
 SPECIES_ID = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']
 
@@ -41,11 +41,14 @@ rule ln_output:
 
 rule coex_calc_script:
     params:
-        template_file = f"{WDIR}/06_coex_calc_template.smk"
+        template_file = f"{WDIR}/06_coex_calc_template.smk",
+        species_id = SPECIES_ID,
+        taxonomy_id = TAXONOMY_ID
     output:
         f"{SPECIES_DIR}/run.smk"
     shell:
         '''
-        touch {output}
-        cat {params.template_file} > {output}
+        cp {params.template_file} {output}
+        sed -i "s/config\['species_id'\]/'{params.species_id}'/g" {output}
+        sed -i "s/config\['taxonomy_id'\]/{params.taxonomy_id}/g" {output}
         '''

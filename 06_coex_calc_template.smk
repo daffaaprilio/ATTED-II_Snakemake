@@ -1,27 +1,31 @@
 from datetime import datetime
 
-WDIR = config['wdir']
+WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
 cutSP = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']
 
-# SP is for SPECIES_ID + type (RNA, microarray, etc.)
+# SP is for: SPECIES_ID + type (RNA, microarray, etc.)
 SP = f"{cutSP}-r"
-
 SPECIES_DIR = f"{WDIR}/{SP}"
+
+rule all:
+    input:
+        f"{SPECIES_DIR}/key_pair",
+        f"{SPECIES_DIR}/subagging.logitMR.ave_1000"
 
 rule combat_pca:
     params:
         max_gene_no = 65000
     input:
-        f"{WDIR}/refseq/{SP}-r_SpeciesSpecific2EGI",
+        f"{WDIR}/refseq/{cutSP}-r_SpeciesSpecific2EGI",
         f"{WDIR}/blacklist-run",
         f"{WDIR}/srainfo-study_table.txt"
     output:
         f"{SPECIES_DIR}/list.txt",
+        f"{SPECIES_DIR}/key",
         f"{SPECIES_DIR}/gc.d/1.gc",
         f"{SPECIES_DIR}/paste.expression.combat",
-        f"{SPECIES_DIR}/pca_loadings.txt",
-        f"{SPECIES_DIR}/key"
+        f"{SPECIES_DIR}/pca_loadings.txt"
     shell:
         '''
         cd {WDIR}
@@ -92,4 +96,33 @@ rule binary_expression:
         cd {WDIR}
         {WDIR}/scripts/2-Subsampling/x-44-paste_gc_data.pl -s {SP} -v {params.version} -d gc.d -m combat_pca
         touch {output}
+        '''
+
+rule key_pair:
+    input:
+        f"{SPECIES_DIR}/.binary_expression_marker"
+    output:
+        f"{SPECIES_DIR}/key_pair"
+    shell:
+        '''
+        cd {SPECIES_DIR}
+        perl -lne 'chomp; push @k,$_ if $_=~/\w/; END{{for $i (0..$#k-1){{for $j ($i+1..$#k){{print "$k[$i]\t$k[$j]"}}}}}}' paste.*.combat_pca.probe > {output}
+        '''
+
+rule subagging_coexpression:
+    input:
+        f"{SPECIES_DIR}/.binary_expression_marker",
+    output:
+        f"{SPECIES_DIR}/subagging.logitMR.ave_1000"
+    shell:
+        '''
+        cd {SPECIES_DIR}
+        {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.bin -o subagging -n 1000 -s 50 -v 1000
+        '''
+
+# rule clean
+rule clean:
+    shell:
+        '''
+        rm -rf {SPECIES_DIR}/*.txt {SPECIES_DIR}/key* {SPECIES_DIR}/paste.* {SPECIES_DIR}/gc.d
         '''
