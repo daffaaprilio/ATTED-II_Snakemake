@@ -1,4 +1,5 @@
-configfile: '05_eval_prep.yaml'
+configfile: 'config/eval_preparation.yaml'
+
 SPECIES_ID = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']
 WDIR=config['wdir']
@@ -9,9 +10,10 @@ KEGG_FTP_PASS=config['kegg_ftp_pass']
 KEGG_FTP_USER=config['kegg_ftp_user']
 DATE_SUFFIX=config['date_suffix']
 
-KEGGFULL=f"{WDIR}/Eval/KEGG.{DATE_SUFFIX}/KEGGfull/{{species}}"
-KEGG50=f"{WDIR}/Eval/KEGG.{DATE_SUFFIX}/KEGG50/{{species}}"
-PARALOGS=f"{WDIR}/Eval/ko-genes.{DATE_SUFFIX}/{{species}}"
+EVAL_DIR=f"{WDIR}/Eval"
+KEGGFULL=f"{EVAL_DIR}/KEGG.{DATE_SUFFIX}/KEGGfull/{{species}}"
+KEGG50=f"{EVAL_DIR}/KEGG.{DATE_SUFFIX}/KEGG50/{{species}}"
+PARALOGS=f"{EVAL_DIR}/ko-genes.{DATE_SUFFIX}/{{species}}"
 
 ALL_KEGGFULL = expand(KEGGFULL, species=SPECIES_ID)
 ALL_KEGG50 = expand(KEGG50, species=SPECIES_ID)
@@ -19,7 +21,7 @@ ALL_PARALOGS = expand(PARALOGS, species=SPECIES_ID)
 
 rule all:
     input:
-        ALL_KEGG50, ALL_PARALOGS
+        EVAL_DIR, ALL_KEGG50, ALL_PARALOGS
 
 rule clean:
     shell:
@@ -28,7 +30,7 @@ rule clean:
         '''
 
 rule ftp_kegg:
-    output: f"{WDIR}/Eval/data/genes_ko.list", f"{WDIR}/Eval/data/genes_ncbi-geneid.list", f"{WDIR}/Eval/data/genes_pathway.list"
+    output: f"{EVAL_DIR}/data/genes_ko.list", f"{EVAL_DIR}/data/genes_ncbi-geneid.list", f"{EVAL_DIR}/data/genes_pathway.list"
     params:
         pathway_link = GENES_PATHWAY_LIST_DOWNLOAD,
         ko_link = GENES_KO_LIST_DOWNLOAD,
@@ -37,17 +39,17 @@ rule ftp_kegg:
         passwd = KEGG_FTP_PASS
     shell:
         '''
-        mkdir -p {WDIR}/Eval/data
-        wget -nc --user {params.user} --password {params.passwd} {params.pathway_link} -O- | gzip -d > {WDIR}/Eval/data/genes_pathway.list
-        wget -nc --user {params.user} --password {params.passwd} {params.ko_link} -O- | gzip -d > {WDIR}/Eval/data/genes_ko.list
-        wget -nc --user {params.user} --password {params.passwd} {params.id_link} -O- | gzip -d > {WDIR}/Eval/data/genes_ncbi-geneid.list
+        mkdir -p {EVAL_DIR}/data
+        wget -nc --user {params.user} --password {params.passwd} {params.pathway_link} -O- | gzip -d > {EVAL_DIR}/data/genes_pathway.list
+        wget -nc --user {params.user} --password {params.passwd} {params.ko_link} -O- | gzip -d > {EVAL_DIR}/data/genes_ko.list
+        wget -nc --user {params.user} --password {params.passwd} {params.id_link} -O- | gzip -d > {EVAL_DIR}/data/genes_ncbi-geneid.list
         '''
 
 rule kegg_full:
     input: 
-        kegg_pathway = f"{WDIR}/Eval/data/genes_pathway.list", 
-        gene_id = f"{WDIR}/Eval/data/genes_ncbi-geneid.list",         
-        kegg_atted_conversion = f"{WDIR}/Eval/species"
+        kegg_pathway = f"{EVAL_DIR}/data/genes_pathway.list", 
+        gene_id = f"{EVAL_DIR}/data/genes_ncbi-geneid.list",         
+        kegg_atted_conversion = f"{EVAL_DIR}/species"
     output: KEGGFULL
     shell:
         '''
@@ -104,9 +106,9 @@ rule kegg_50:
 
 rule ko_genes_all:
     input: 
-        f"{WDIR}/Eval/data/genes_ko.list", 
-        f"{WDIR}/Eval/data/genes_ncbi-geneid.list", 
-        f"{WDIR}/Eval/species"
+        f"{EVAL_DIR}/data/genes_ko.list", 
+        f"{EVAL_DIR}/data/genes_ncbi-geneid.list", 
+        f"{EVAL_DIR}/species"
     params:
         wdir = WDIR,
         date = DATE_SUFFIX
