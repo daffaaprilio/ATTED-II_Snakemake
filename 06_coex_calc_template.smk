@@ -11,7 +11,8 @@ SPECIES_DIR = f"{WDIR}/{SP}"
 rule all:
     input:
         f"{SPECIES_DIR}/key_pair",
-        f"{SPECIES_DIR}/subagging.logitMR.ave_1000"
+        f"{SPECIES_DIR}/subagging.logitMR.ave_1000",
+        directory(f"{SPECIES_DIR}/nlmr.d")
 
 rule combat_pca:
     params:
@@ -113,16 +114,44 @@ rule subagging_coexpression:
     input:
         f"{SPECIES_DIR}/.binary_expression_marker",
     output:
-        f"{SPECIES_DIR}/subagging.logitMR.ave_1000"
+        protected(f"{SPECIES_DIR}/subagging.logitMR.ave_1000")
     shell:
         '''
         cd {SPECIES_DIR}
         {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.bin -o subagging -n 1000 -s 50 -v 1000
         '''
 
+rule z_scoring:
+    input:
+        key_pair = f"{SPECIES_DIR}/key_pair",
+        coex_file = f"{SPECIES_DIR}/subagging.logitMR.ave_1000"
+    output:
+        directory(f"{SPECIES_DIR}/nlmr.d")
+    shell:
+        '''
+        cd {SPECIES_DIR}
+        mkdir {SPECIES_DIR}/tmp.nlmr_unsorted
+        cd {SPECIES_DIR}/tmp.nlmr_unsorted
+        paste {input.key_pair} {input.coex_file} | perl -lane '$mr{{$F[0]}}{{$F[1]}}=$F[2]; $mr{{$F[1]}}{{$F[0]}}=$F[2]; if ($. % 100000000 == 0){{for $g1 (keys %mr){{open OUT, ">>$g1"; for $g2 (keys %{{$mr{{$g1}}}}){{print OUT $g2,"\t",$mr{{$g1}}{{$g2}}}}}}; undef %mr}}; END{{for $g1 (keys %mr){{open OUT, ">>$g1"; for $g2 (keys %{{$mr{{$g1}}}}){{print OUT $g2,"\t",$mr{{$g1}}{{$g2}}}}}}}}'  
+        mkdir {SPECIES_DIR}/nlmr.d
+        for i in *; do
+            perl -lane '$mr{{$F[0]}}=-$F[1]; END{{printf "%s\t%.2f\n", $ARGV, -log(1/$.)/log(2); for $g (sort {{$mr{{$b}}<=>$mr{{$a}}}} keys %mr){{printf "%s\t%.2f\n", $g, $mr{{$g}}}}}}' $i | uniq > ../nlmr.d/$i;
+        done
+        cd {SPECIES_DIR}
+        rm -r {SPECIES_DIR}/tmp.nlmr_unsorted
+        echo "transform finished, then z-scoring..."
+        date
+        {WDIR}/scripts/3-z-scoring/x-47-zscoring_directory.pl -i nlmr.d
+        echo "Finished for {SP} >> {SP}/nlmrd.z."
+        date
+        echo "rename zscored directory to nlmr.d for preparation of upload..."
+        mv {SPECIES_DIR}/nlmr.d {SPECIES_DIR}/nlmr.d.beforezscore
+        mv {SPECIES_DIR}nlmr.d.zscore {SPECIES_DIR}nlmr.d
+        '''
+
 # rule clean
 rule clean:
     shell:
         '''
-        rm -rf {SPECIES_DIR}/*.txt {SPECIES_DIR}/key* {SPECIES_DIR}/paste.* {SPECIES_DIR}/gc.d
+        rm -rf {SPECIES_DIR}/*.txt {SPECIES_DIR}/key* {SPECIES_DIR}/paste.* {SPECIES_DIR}/gc.d {SPECIES_DIR}/nlmr.d
         '''
