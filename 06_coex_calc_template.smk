@@ -8,11 +8,19 @@ TAXONOMY_ID = config['taxonomy_id']
 SP = f"{cutSP}-r"
 SPECIES_DIR = f"{WDIR}/{SP}"
 
+# 
+KEGG_ftp_date = "2025-12-15"
+EVAL_DATE = datetime.now().strftime('%Y-%m-%d')
+EVAL_OUTPUT = f"{SPECIES_DIR}/score.KEGG50.KEGG.{KEGG_ftp_date}.{SP}.{EVAL_DATE}"
+
+
 rule all:
     input:
         f"{SPECIES_DIR}/key_pair",
         f"{SPECIES_DIR}/subagging.logitMR.ave_1000",
-        directory(f"{SPECIES_DIR}/nlmr.d")
+        f"{SPECIES_DIR}/nlmr.d.zscore",
+        EVAL_OUTPUT
+        
 
 rule combat_pca:
     params:
@@ -126,7 +134,8 @@ rule z_scoring:
         key_pair = f"{SPECIES_DIR}/key_pair",
         coex_file = f"{SPECIES_DIR}/subagging.logitMR.ave_1000"
     output:
-        directory(f"{SPECIES_DIR}/nlmr.d")
+        directory(f"{SPECIES_DIR}/nlmr.d.zscore"),
+        directory(f"{SPECIES_DIR}/nlmr.d.beforezscore")
     shell:
         '''
         cd {SPECIES_DIR}
@@ -147,6 +156,21 @@ rule z_scoring:
         echo "rename zscored directory to nlmr.d for preparation of upload..."
         mv {SPECIES_DIR}/nlmr.d {SPECIES_DIR}/nlmr.d.beforezscore
         mv {SPECIES_DIR}nlmr.d.zscore {SPECIES_DIR}nlmr.d
+        '''
+
+rule evaluation:
+    input:
+        key_pair = f"{SPECIES_DIR}/key_pair",
+        coex_file = f"{SPECIES_DIR}/subagging.logitMR.ave_1000"
+    params:
+        kegg_date = KEGG_ftp_date,
+        cutSP = cutSP
+    output:
+        EVAL_OUTPUT
+    shell:
+        '''
+        cd {SPECIES_DIR}
+        {WDIR}/Eval/score_excl_paralog_pair.pl -s {params.cutSP} -K {WDIR}/Eval/KEGG.{params.kegg_date}/KEGG50 -g {WDIR}/Eval/ko-genes.{params.kegg_date}/{params.cutSP} -f {input.coex_file} -p {input.key_pair} -o {output} || true
         '''
 
 # rule clean
