@@ -4,13 +4,17 @@ WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
 cutSP = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']
 
+REP_NO = f"_{config.get('repetition_id', '')}" if config.get('repetition_id', '') else ""
+
 # SP is for: SPECIES_ID + type (RNA, microarray, etc.)
-SP = f"{cutSP}-r"
+SP = f"{cutSP}-r{REP_NO}"
 SPECIES_DIR = f"{WDIR}/{SP}"
 
 # step specific parameters
 PCA_TYPE = "double"
-SUBAGGING_AVE = 1000
+SUBAGGING_AVE = config.get('subagging_ave', '') if config.get('subagging_ave', '') else 1000
+VALID_NUM = config.get('valid_num', '') if config.get('valid_num', '') else 1000
+SAMPLING_RATE = config.get('sampling_rate', '') if config.get('sampling_rate', '') else 50
 KEGG_ftp_date = "2025-12-15"
 EVAL_DATE = datetime.now().strftime('%Y-%m-%d')
 EVAL_OUTPUT = f"{SPECIES_DIR}/score.KEGG50.KEGG.{KEGG_ftp_date}.{SP}.{EVAL_DATE}"
@@ -123,7 +127,9 @@ rule key_pair:
 
 rule subagging_coexpression:
     params:
-        subagging = SUBAGGING_AVE
+        subagging = SUBAGGING_AVE,
+        valid_num = VALID_NUM,
+        sampling_rate = SAMPLING_RATE
     input:
         f"{SPECIES_DIR}/.binary_expression_marker",
     output:
@@ -131,7 +137,7 @@ rule subagging_coexpression:
     shell:
         '''
         cd {SPECIES_DIR}
-        {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.bin -o subagging -n {params.subagging} -s 50 -v 1000 -c
+        {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.bin -o subagging -n {params.subagging} -s {params.sampling_rate} -v {params.valid_num} -c
         '''
 
 rule z_scoring:
