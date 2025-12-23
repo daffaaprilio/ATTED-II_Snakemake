@@ -1,14 +1,15 @@
 #!/bin/bash
 WDIR=/home/daffa/Work/2025/11-ATTED-II_ver-13.0
+SPID=$1
 
-# to update kegg_full rule in the eval prep smk for Cre
+# to update kegg_full rule in the eval prep smk for ${SPID}
 kegg_pathway=${WDIR}/Eval/data/genes_pathway.list
-gene_id=${WDIR}/refseq/Cre-r_SpeciesSpecific2EGI       
+gene_id=${WDIR}/refseq/${SPID}-r_SpeciesSpecific2EGI       
 kegg_atted_conversion=${WDIR}/Eval/species
-output=${WDIR}/testing_cre_full/Cre
-actual_output=${WDIR}/testing_cre_50/Cre
+output=${WDIR}/Eval/KEGG.2025-12-15/KEGGfull/${SPID}
+output_50=${WDIR}/Eval/KEGG.2025-12-15/KEGG50/${SPID}
 
-SPECIES=$(echo "Cre" | tr '[:upper:]' '[:lower:]')
+SPECIES=$(echo "${SPID}" | tr '[:upper:]' '[:lower:]')
 
 CONVERSION_LINE=$(grep "^$SPECIES" ${kegg_atted_conversion} || echo "$SPECIES")
 
@@ -67,4 +68,4 @@ awk '
         if($i != "") gene_count++
     }}
     if(gene_count <= 50) print $0
-}}' "$output" > "$actual_output"
+}}' "$output" > "$output_50"
