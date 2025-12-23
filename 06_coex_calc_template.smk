@@ -188,5 +188,5 @@ rule evaluation:
 rule clean:
     shell:
         '''
-        rm -rf {SPECIES_DIR}/*.txt {SPECIES_DIR}/key* {SPECIES_DIR}/paste.* {SPECIES_DIR}/gc.d {SPECIES_DIR}/nlmr.d
+        rm -rf {SPECIES_DIR}/.binary_expression_marker {SPECIES_DIR}/*.txt {SPECIES_DIR}/key* {SPECIES_DIR}/paste.* {SPECIES_DIR}/gc.d {SPECIES_DIR}/nlmr.d {SPECIES_DIR}/79m*
         '''

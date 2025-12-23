@@ -56,3 +56,9 @@ rule coex_calc_script:
         sed -i "s/config\\['taxonomy_id'\\]/{params.taxonomy_id}/g" {output}
         sed -i "s/config\\.get('repetition_id', '')/'{params.repetition_id}'/g" {output}
         '''
+
+rule clean:
+    shell:
+        '''
+        rm {SPECIES_DIR}/run.smk {SPECIES_DIR}/output
+        '''
