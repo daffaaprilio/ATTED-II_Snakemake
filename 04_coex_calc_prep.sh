@@ -1,7 +1,7 @@
 #!/bin/bash
 
-species_ids=(Sbi Cre Sot Osi Cit Bdi Nta Bra Mtr Osa Ppo Sly Zma)
-taxonomy_ids=(4558 3055 4113 39946 2711 15368 4097 3711 3880 39947 3694 4081 4577)
+species_ids=(Bdi Bra Cit Cre Osa Osi Sbi Sot)
+taxonomy_ids=(15368 3711 2711 3055 39947 39946 4558 4113)
 
 for i in "${!species_ids[@]}"; do
     sp="${species_ids[$i]}"
