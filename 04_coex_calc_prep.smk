@@ -8,7 +8,7 @@ REP_NO = f"_{config.get('repetition_id', '')}" if config.get('repetition_id', ''
 '''
 1. Create species directory
 2. In species directory, create symbolic link to the output file
-2. In species directory, create batchrun script for each species in the species directory
+3. In species directory, create batchrun script (from snakefile template)
 '''
 
 SPECIES_DIR = f"{WDIR}/{SPECIES_ID}-r{REP_NO}" if REP_NO else f"{WDIR}/{SPECIES_ID}-r"
@@ -35,7 +35,7 @@ rule ln_output:
         output_file = OUTPUT_FILE,
         symlink_name = f"{SPECIES_DIR}/output"
     output:
-        directory(f"{SPECIES_DIR}/output")
+        f"{SPECIES_DIR}/output"
     shell:
         '''
         ln -s {params.output_file} {params.symlink_name}

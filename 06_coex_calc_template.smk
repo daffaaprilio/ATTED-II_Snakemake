@@ -25,12 +25,10 @@ rule all:
         f"{SPECIES_DIR}/key_pair",
         f"{SPECIES_DIR}/subagging.logitMR.ave_{SUBAGGING_AVE}",
         f"{SPECIES_DIR}/nlmr.d",
-        EVAL_OUTPUT
-        
+        EVAL_OUTPUT 
 
 rule combat_pca:
     params:
-        max_gene_no = 65000,
         pca = PCA_TYPE
     input:
         f"{WDIR}/refseq/{cutSP}-r_SpeciesSpecific2EGI",
@@ -45,7 +43,7 @@ rule combat_pca:
     shell:
         '''
         cd {WDIR}
-        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.SGI2EGI.R -s {SP} -n {params.max_gene_no} -p {params.pca}
+        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.SGI2EGI.R -s {SP} -p {params.pca}
         '''
 
 rule create_id_title:
