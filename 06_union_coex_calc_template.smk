@@ -12,6 +12,8 @@ SPECIES_DIR = f"{WDIR}/{SP}"
 
 # step specific synonyms
 KEGG_ftp_date = "2025-12-15"
+EVAL_DATE = datetime.now().strftime('%Y-%m-%d')
+
 UNION_GENE_DIR = directory(f"{SPECIES_DIR}/{SP}")
 EVAL_OUTPUT = f"{SPECIES_DIR}/score.KEGG50.KEGG.{KEGG_ftp_date}.{SP}.{EVAL_DATE}"
 
@@ -22,8 +24,8 @@ rule all:
 
 rule unionizing:
     input:
-        f"{SPECIES_ID}-m",
-        f"{SPECIES_ID}-r"
+        f"{cutSP}-m",
+        f"{cutSP}-r"
     output:
         UNION_GENE_DIR
     shell:
@@ -31,9 +33,9 @@ rule unionizing:
         echo "New calculation for {SP}"
         echo "\n(1) Processing union..."
         date
-        cd ${SP}
+        cd {SPECIES_DIR}
         pwd;
-        RScript {WDIR}/scripts/2-Subsampling/x02-union.R -s {cutSP}
+        Rscript {WDIR}/scripts/2-Subsampling/x02-union.R -s {cutSP}
         echo "\nFinished for {SP}."
         '''
 
@@ -49,6 +51,6 @@ rule evaluation:
         echo "\n(2) Performance evaluation..."
         date 
         cd {SPECIES_DIR}
-        {WDIR}/Eval/score_excl_paralog_pair.pl -s {cutSP} -K {WDIR}/Eval/KEGG.{params.kegg_date}/KEGG50 -g {WDIR}/Eval/ko-genes.{params.kegg_date}/{cutSP} -d {SP:0:5} -o {output} || true
+        {WDIR}/Eval/score_excl_paralog_pair.pl -s {cutSP} -K {WDIR}/Eval/KEGG.{params.kegg_date}/KEGG50 -g {WDIR}/Eval/ko-genes.{params.kegg_date}/{cutSP} -d {cutSP}-u -o {output} || true
         echo "\nFinished for {SP}."
         '''
