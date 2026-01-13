@@ -35,7 +35,7 @@ rule ln_output:
         output_file = OUTPUT_FILE,
         symlink_name = f"{SPECIES_DIR}/output"
     output:
-        f"{SPECIES_DIR}/output"
+        directory(f"{SPECIES_DIR}/output")
     shell:
         '''
         ln -s {params.output_file} {params.symlink_name}
