@@ -25,7 +25,15 @@ rule all:
         f"{SPECIES_DIR}/key_pair",
         f"{SPECIES_DIR}/subagging.logitMR.ave_{SUBAGGING_AVE}",
         f"{SPECIES_DIR}/nlmr.d",
-        EVAL_OUTPUT 
+        EVAL_OUTPUT,
+        f"{SPECIES_DIR}/id-id-title.txt",
+        f"{SPECIES_DIR}/study_info.txt",
+        f"{SPECIES_DIR}/run_info.txt",
+        f"{SPECIES_DIR}/pc_select_run.txt",
+        f"{SPECIES_DIR}/pc_select_exp.txt",    
+        f"{SPECIES_DIR}/pca_loadings.txt",
+        f"{SPECIES_DIR}/04.table.txt",
+        f"{SPECIES_DIR}/04.url.txt"
 
 rule combat_pca:
     params:
