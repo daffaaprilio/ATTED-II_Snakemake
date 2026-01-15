@@ -64,7 +64,7 @@ rule loading_annotation_prep:
         ln -s {SPECIES_DIR}/pca_loadings_core.txt pca_loadings.txt
         ln -s {SPECIES_DIR}/list_core.txt list.txt
         echo "loading annotation for Ecotype"
-        cd {SPECIES_CORE_DIR}
+        cd {SPECIES_ECO_DIR}
         ln -s {SPECIES_DIR}/pca_loadings_core.txt pca_loadings.txt
         ln -s {SPECIES_DIR}/list_core.txt list.txt
         '''
