@@ -2,7 +2,7 @@ from pathlib import Path
 import glob
 
 WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
-RNA_DIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
+MICROARRAY_DIR = "/home/hibara/ATTED-II_ver.11.0"
 UPLOAD_DIR = f"{WDIR}/upload"
 
 PUB_VER = config['public_version']
@@ -10,8 +10,8 @@ PUB_DIR = f"{UPLOAD_DIR}/coex/{PUB_VER}"
 PUB_DIR_UNZIP = f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}"
 SP = PUB_VER[:5]
 OFC_DATE = "2026.02.16"
-METHOD = "r26"
-TYPE = "ls"
+METHOD = "m21"
+TYPE = "z"
 NEW_DATA_LIST = config['out_file']
 
 # files in public directory base name 
@@ -45,21 +45,20 @@ if new_line not in existing_lines:
         f.write(f"{new_line}\n")
 
 '''
-1. Prepare a directory named upload/coex/Xxx-r.c?-? and upload/coex_unzip/Xxx-r.c?-?
-2. Each Public Directory contains information files, sample/study information, PCA selection metadata, expression data, and coexpression data
+1. Prepare a directory named upload/coex/Xxx-m.c?-? and upload/coex_unzip/Xxx-m.c?-?
+2. Each Public Directory contains information files, sample/study information, expression data, and coexpression data
 3. Each Unzip Public Directory contains private directory
 '''
 
-print(f"=== Processing RNA version: {PUB_VER} ===")
+print(f"=== Processing MICROARRAY version: {PUB_VER} ===")
 
 rule all:
     input:
         f"{PUB_DIR}/date", f"{PUB_DIR}/method", f"{PUB_DIR}/type", f"{PUB_DIR}/genes.txt", f"{PUB_DIR}/KEGG",
-        f"{PUB_DIR}/{PUB_VER}.run_info.txt", f"{PUB_DIR}/{PUB_VER}.study_info.txt", f"{PUB_DIR}/{PUB_VER}.id-id-title.txt", f"{PUB_DIR}/pc_select_exp.txt", f"{PUB_DIR}/pc_select_run.txt", f"{PUB_DIR}/pc_select_run.txt.zip", f"{PUB_DIR}/pc_select_run.txt.zip.md5.txt",
+        f"{PUB_DIR}/{PUB_VER}.run_info.txt", f"{PUB_DIR}/{PUB_VER}.study_info.txt", f"{PUB_DIR}/{PUB_VER}.id-id-title.txt",
         f"{EXPR_COMBAT}", f"{EXPR_COMBAT}.zip", f"{EXPR_COMBAT}.zip.md5.txt", f"{EXPR_COMBAT}.zip.sha256.txt", f"{EXPR_COMBAT}.tar.bz2", f"{EXPR_COMBAT}.tar.bz2.md5.txt", f"{EXPR_COMBAT}.tar.bz2.sha256.txt",
         f"{EXPR_PC}", f"{EXPR_PC}.zip", f"{EXPR_PC}.zip.md5.txt",
         f"{PUB_DIR}/{C_FILE}",
-        f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip", f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.md5.txt", f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.sha256.txt",  
         f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d/"
 
 # information files
@@ -94,7 +93,7 @@ rule kegg:
     output:
         f"{PUB_DIR}/KEGG"
     input:
-        glob.glob(f"{RNA_DIR}/{SP}/score.KEGG*")[0]
+        glob.glob(f"{MICROARRAY_DIR}/{SP}/score.KEGG*")[0]
     shell:
         '''
         cp -p {input} {output}
@@ -104,42 +103,34 @@ rule genes:
     output:
         f"{PUB_DIR}/genes.txt"
     input:
-        f"{RNA_DIR}/{SP}/paste.expression.combat"
+        f"{MICROARRAY_DIR}/{SP}/paste.expression.combat"
     shell:
         '''
         cut -f1 {input} | tail -n +2 > {output}
         '''
 
 # sample/study information
-rule info_loadings_files:
+rule info_files:
     output:
         run_info = f"{PUB_DIR}/{PUB_VER}.run_info.txt",
         study_info = f"{PUB_DIR}/{PUB_VER}.study_info.txt",
-        id_title = f"{PUB_DIR}/{PUB_VER}.id-id-title.txt",
-        pc_run = f"{PUB_DIR}/pc_select_run.txt",
-        pc_exp = f"{PUB_DIR}/pc_select_exp.txt",
-        pc_run_zip = f"{PUB_DIR}/pc_select_run.txt.zip"
+        id_title = f"{PUB_DIR}/{PUB_VER}.id-id-title.txt"
     input:
-        run_info = f"{RNA_DIR}/{SP}/run_info.txt",
-        study_info = f"{RNA_DIR}/{SP}/study_info.txt",
-        id_title = f"{RNA_DIR}/{SP}/id-id-title.txt",
-        pc_run = f"{RNA_DIR}/{SP}/pc_select_run.txt",
-        pc_exp = f"{RNA_DIR}/{SP}/pc_select_exp.txt"
+        run_info = f"{MICROARRAY_DIR}/{SP}/run_info.txt",
+        study_info = f"{MICROARRAY_DIR}/{SP}/study_info.txt",
+        id_title = f"{MICROARRAY_DIR}/{SP}/id-id-title.txt"
     shell:
         '''
         cp -p {input.run_info} {output.run_info}
         cp -p {input.study_info} {output.study_info}
         cp -p {input.id_title} {output.id_title}
-        cp -p {input.pc_run} {output.pc_run}
-        cp -p {input.pc_exp} {output.pc_exp}
-        zip -q {output.pc_run_zip} {output.pc_run}
         '''
 
 # expresssion files
 rule expression_data:
     input:
-        combat = f"{RNA_DIR}/{SP}/paste.expression.combat",
-        pc = f"{RNA_DIR}/{SP}/gc.d/1.gc"
+        combat = f"{MICROARRAY_DIR}/{SP}/paste.expression.combat",
+        pc = f"{MICROARRAY_DIR}/{SP}/gc.d/1.gc"
     output: 
         combat_main = EXPR_COMBAT,
         combat_zip = f"{EXPR_COMBAT}.zip",
@@ -151,7 +142,7 @@ rule expression_data:
         cp -p {input.combat} {output.combat_main}
         zip -q {output.combat_zip} {output.combat_main}
         tar -jcvf {output.combat_tar} {output.combat_main}
-        cp -p {input.pc} {output.pc_main}
+        cut -f 1-1001 {input.pc} > {output.pc_main}
         zip -q {output.pc_zip} {output.pc_main}
         '''
 
@@ -163,7 +154,7 @@ rule coexpression_data:
         coex_unzip = directory(f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d/")
     input:
         c_path = C_PATH,
-        nlmr_dir = f"{RNA_DIR}/{SP}/nlmr.d"
+        nlmr_dir = f"{MICROARRAY_DIR}/{SP}/nlmr.d"
     shell:
         '''
         mkdir -p {output.coex_unzip}
@@ -178,8 +169,7 @@ rule checksums:
         combat_zip = rules.expression_data.output.combat_zip,
         combat_tar = rules.expression_data.output.combat_tar,
         pc_zip = rules.expression_data.output.pc_zip,
-        coex_zip = rules.coexpression_data.output.coex_zip,
-        pc_run_zip = rules.info_loadings_files.output.pc_run_zip
+        coex_zip = rules.coexpression_data.output.coex_zip
     output:
         combat_zip_md5 = f"{EXPR_COMBAT}.zip.md5.txt",
         combat_zip_sha256 = f"{EXPR_COMBAT}.zip.sha256.txt",
@@ -187,8 +177,7 @@ rule checksums:
         combat_tar_sha256 = f"{EXPR_COMBAT}.tar.bz2.sha256.txt",
         pc_zip_md5 = f"{EXPR_PC}.zip.md5.txt",
         coex_zip_md5 = f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.md5.txt",
-        coex_zip_sha256 = f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.sha256.txt",
-        pc_run_zip_md5 = f"{PUB_DIR}/pc_select_run.txt.zip.md5.txt"
+        coex_zip_sha256 = f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.sha256.txt"
     shell:
         '''
         md5sum {input.combat_zip} > {output.combat_zip_md5}
@@ -198,7 +187,6 @@ rule checksums:
         md5sum {input.pc_zip} > {output.pc_zip_md5}
         md5sum {input.coex_zip} > {output.coex_zip_md5}
         sha256sum {input.coex_zip} > {output.coex_zip_sha256}
-        md5sum {input.pc_run_zip} > {output.pc_run_zip_md5}
         '''
 
 rule clean:
@@ -206,3 +194,4 @@ rule clean:
         '''
         rm -rf {PUB_DIR}/*
         '''
+

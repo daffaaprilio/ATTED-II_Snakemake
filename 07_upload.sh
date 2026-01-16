@@ -8,21 +8,21 @@
 WDIR=/home/daffa/Work/2025/11-ATTED-II_ver-13.0
 
 PUB_VER_RNA=(
-    # Bdi-r.c1-0
-    # Bra-r.c6-0
-    # Cit-r.c1-0
-    # Cre-r.c1-0
-    # Gma-r.c7-0
-    # Mtr-r.c5-0
-    # Nta-r.c1-0
-    # Osa-r.c6-0
+    Bdi-r.c1-0
+    Bra-r.c6-0
+    Cit-r.c1-0
+    Cre-r.c1-0
+    Gma-r.c7-0
+    Mtr-r.c5-0
+    Nta-r.c1-0
+    Osa-r.c6-0
     # Osi-r.c1-0
-    # Ppo-r.c4-0
-    # Sbi-r.c1-0
-    # Sly-r.c6-0
-    # Sot-r.c1-0
+    Ppo-r.c4-0
+    Sbi-r.c1-0
+    Sly-r.c6-0
+    Sot-r.c1-0
     Vvi-r.c5-0
-    # Zma-r.c6-0
+    Zma-r.c6-0
 )
 
 PUB_VER_UNION=(
@@ -36,21 +36,24 @@ PUB_VER_UNION=(
 
 out_file="${WDIR}/upload/ATTED-II_newDataList_2026_01.tsv"
 
+if [ ! -d "${WDIR}/upload" ] ; then
+    mkdir -p "${WDIR}/upload"
+fi
+
 if [ ! -f "${out_file}" ] ; then
     touch "${out_file}"
 fi
 
 # run snakemake
-for sp in ${PUB_VER_RNA[@]}; do
-    snakemake -c 1 -s ${WDIR}/07_upload-r.smk --config 'public_version'=${sp} 'out_file'=${out_file};
-done
+printf '%s\n' "${PUB_VER_RNA[@]}" | xargs -P 5 -I {} snakemake -c 1 -s ${WDIR}/07_upload-r.smk --config 'public_version'={} 'out_file'=${out_file}
+printf '%s\n' "${PUB_VER_UNION[@]}" | xargs -P 3 -I {} snakemake -c 1 -s ${WDIR}/07_upload-u.smk --config 'public_version'={} 'out_file'=${out_file}
 
-# for sp in ${PUB_VER_UNION[@]}; do
-#     snakemake -c 1 -s ${WDIR}/07_upload-u.smk --config 'public_version'=${sp} 'out_file'=${out_file};
-# done
-
-
-
+# rename Osi-r into Osa-e
+if [ -d "upload" ] && [ ! -d "upload/coex/Osa-e.c1-0" ]; then
+  grep -rl "Osi-r" upload 2>/dev/null | xargs -r sed -i 's/Osi-r/Osa-e/g'
+  find upload -type f -name '*Osi-r*' -exec bash -c 'mv "$1" "${1//Osi-r/Osa-e}" 2>/dev/null || true' _ {} \;
+  find upload -depth -type d -name '*Osi-r*' -exec bash -c 'mv "$1" "${1//Osi-r/Osa-e}" 2>/dev/null || true' _ {} \;
+fi
 
 
 

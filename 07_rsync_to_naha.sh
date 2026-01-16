@@ -1,0 +1,52 @@
+#!/bin/zsh
+DESTINATION_ATTED_DIR=daffa@naha:
+
+SOURCE_ATTED_DIR=/home/daffa/Work/2025/11-ATTED-II_ver-13.0/upload/
+FILES_TO_COPY=(
+    "./coex/Bdi-r.c1-0"
+    "./coex/Bra-r.c6-0"
+    "./coex/Cit-r.c1-0"
+    "./coex/Cre-r.c1-0"
+    "./coex/Gma-r.c7-0"
+    "./coex/Mtr-r.c5-0"
+    "./coex/Mtr-u.c5-0"
+    "./coex/Nta-r.c1-0"
+    "./coex/Osa-e.c1-0"
+    "./coex/Osa-r.c6-0"
+    "./coex/Osa-u.c5-0"
+    "./coex/Osi-r.c1-0"
+    "./coex/Ppo-r.c4-0"
+    "./coex/Ppo-u.c5-0"
+    "./coex/Sbi-r.c1-0"
+    "./coex/Sly-r.c6-0"
+    "./coex/Sly-u.c5-0"
+    "./coex/Sot-r.c1-0"
+    "./coex/Vvi-r.c5-0"
+    "./coex/Vvi-u.c5-0"
+    "./coex/Zma-r.c6-0"
+    "./coex_unzip/Bdi-r.c1-0"
+    "./coex_unzip/Bra-r.c6-0"
+    "./coex_unzip/Cit-r.c1-0"
+    "./coex_unzip/Cre-r.c1-0"
+    "./coex_unzip/Gma-r.c7-0"
+    "./coex_unzip/Mtr-r.c5-0"
+    "./coex_unzip/Mtr-u.c5-0"
+    "./coex_unzip/Nta-r.c1-0"
+    "./coex_unzip/Osa-e.c1-0"
+    "./coex_unzip/Osa-r.c6-0"
+    "./coex_unzip/Osa-u.c5-0"
+    "./coex_unzip/Osi-r.c1-0"
+    "./coex_unzip/Ppo-r.c4-0"
+    "./coex_unzip/Ppo-u.c5-0"
+    "./coex_unzip/Sbi-r.c1-0"
+    "./coex_unzip/Sly-r.c6-0"
+    "./coex_unzip/Sly-u.c5-0"
+    "./coex_unzip/Sot-r.c1-0"
+    "./coex_unzip/Vvi-r.c5-0"
+    "./coex_unzip/Vvi-u.c5-0"
+    "./coex_unzip/Zma-r.c6-0"
+)
+
+for file in ${FILES_TO_COPY[@]}; do
+    rsync -avzP --partial --inplace --compress-level=6 --relative -e ssh ${SOURCE_ATTED_DIR}/${file} ${DESTINATION_ATTED_DIR}/;
+done
