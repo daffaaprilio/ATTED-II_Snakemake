@@ -30,16 +30,26 @@ if not c_files:
 C_PATH = c_files[0]  # full path to the C file (of the RNA version)
 C_FILE = Path(C_PATH).name  # just the full name of the C file
 stem = Path(C_PATH).stem
+stem = stem.replace('-r', '-u') # rename private version from -r to -u
 parts = stem.split('.')
+
+# determine num p and num s for this union version
+M_ZIP_PATH = glob.glob(f"{m_versions[0]}/*.d.zip")[0]
+m_zip_stem = Path(M_ZIP_PATH).stem # Vvi-m.v21-01.G9421-S258.combat_pca_subagging.ls.d.zip
+m_zip_parts = m_zip_stem.split('.') 
+m_zip_num_s = m_zip_parts[2].split('-')[1]
+
 num_p, num_s = parts[3].split('-')
 num_p = num_p.replace('P', 'G')
+num_s = f"S{int(num_s.replace('S', '')) + int(m_zip_num_s.replace('S', ''))}"
 
 # Correction for num_s - use union sample count
 if num_s.replace('S', '') == num_p.replace('G', ''):
     with open(f"{WDIR}/{SP}/list.txt", 'r') as f:
         num_s = f'S{sum(1 for line in f)}'
 
-PRIV_VER = '.'.join(parts[1:3] + [num_p, num_s] + parts[4:6]) 
+num_ps = '-'.join([num_p, num_s])
+PRIV_VER = '.'.join(parts[1:3] + [num_ps] + parts[4:6])  
 PRIV_DIR = f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d"
 
 # Create "from" content for union (lists both microarray and RNA versions)
@@ -134,7 +144,6 @@ rule from_file:
 # coexpression files
 rule coexpression_data:
     output:
-        c_file = f"{PUB_DIR}/{C_FILE}",
         coex_zip = f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip",
         coex_unzip = directory(f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d/")
     input:
@@ -145,7 +154,6 @@ rule coexpression_data:
         mkdir -p {output.coex_unzip}
         rsync -a {input.union_dir}/ {output.coex_unzip}/
         zip -rq {output.coex_zip} {output.coex_unzip}/
-        cp -p {input.c_path} {output.c_file} 
         '''
 
 # checksums
@@ -157,8 +165,8 @@ rule checksums:
         coex_zip_sha256 = f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.sha256.txt"
     shell:
         '''
-        md5sum {input.coex_zip} > {output.coex_zip_md5}
-        sha256sum {input.coex_zip} > {output.coex_zip_sha256}
+        (cd $(dirname {input.coex_zip}) && md5sum $(basename {input.coex_zip})) > {output.coex_zip_md5}
+        (cd $(dirname {input.coex_zip}) && sha256sum $(basename {input.coex_zip})) > {output.coex_zip_sha256}
         '''
 
 rule clean:

@@ -137,7 +137,7 @@ rule subagging_coexpression:
         valid_num = VALID_NUM,
         sampling_rate = SAMPLING_RATE
     input:
-        f"{SPECIES_DIR}/.binary_expression_marker",
+        f"{SPECIES_DIR}/.binary_expression_marker"
     output:
         protected(f"{SPECIES_DIR}/subagging.logitMR.ave_{SUBAGGING_AVE}")
     shell:

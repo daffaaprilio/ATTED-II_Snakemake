@@ -11,7 +11,7 @@ PUB_DIR_UNZIP = f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}"
 SP = PUB_VER[:5]
 OFC_DATE = "2026.02.16"
 METHOD = "r26"
-TYPE = "ls"
+TYPE = "z"
 NEW_DATA_LIST = config['out_file']
 
 # files in public directory base name 
@@ -29,7 +29,8 @@ num_p = num_p.replace('P', 'G')
 if num_s.replace('S', '') == num_p.replace('G', ''):
     with open(f"{WDIR}/{SP}/list.txt", 'r') as f:
         num_s = f'S{sum(1 for line in f)}'
-PRIV_VER = '.'.join(parts[1:3] + [num_p, num_s] + parts[4:6]) 
+num_ps = '-'.join([num_p, num_s])
+PRIV_VER = '.'.join(parts[1:3] + [num_ps] + parts[4:6]) 
 PRIV_DIR = f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d"
 
 # populate new data list
@@ -191,14 +192,14 @@ rule checksums:
         pc_run_zip_md5 = f"{PUB_DIR}/pc_select_run.txt.zip.md5.txt"
     shell:
         '''
-        md5sum {input.combat_zip} > {output.combat_zip_md5}
-        sha256sum {input.combat_zip} > {output.combat_zip_sha256}
-        md5sum {input.combat_tar} > {output.combat_tar_md5}
-        sha256sum {input.combat_tar} > {output.combat_tar_sha256}
-        md5sum {input.pc_zip} > {output.pc_zip_md5}
-        md5sum {input.coex_zip} > {output.coex_zip_md5}
-        sha256sum {input.coex_zip} > {output.coex_zip_sha256}
-        md5sum {input.pc_run_zip} > {output.pc_run_zip_md5}
+        (cd $(dirname {input.combat_zip}) && md5sum $(basename {input.combat_zip})) > {output.combat_zip_md5}
+        (cd $(dirname {input.combat_zip}) && sha256sum $(basename {input.combat_zip})) > {output.combat_zip_sha256}
+        (cd $(dirname {input.combat_tar}) && md5sum $(basename {input.combat_tar})) > {output.combat_tar_md5}
+        (cd $(dirname {input.combat_tar}) && sha256sum $(basename {input.combat_tar})) > {output.combat_tar_sha256}
+        (cd $(dirname {input.pc_zip}) && md5sum $(basename {input.pc_zip})) > {output.pc_zip_md5}
+        (cd $(dirname {input.coex_zip}) && md5sum $(basename {input.coex_zip})) > {output.coex_zip_md5}
+        (cd $(dirname {input.coex_zip}) && sha256sum $(basename {input.coex_zip})) > {output.coex_zip_sha256}
+        (cd $(dirname {input.pc_run_zip}) && md5sum $(basename {input.pc_run_zip})) > {output.pc_run_zip_md5}
         '''
 
 rule clean:
