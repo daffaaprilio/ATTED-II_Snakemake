@@ -97,7 +97,7 @@ rule loading_annotation_prep:
         echo "loading annotation for Ecotype"
         cd {SPECIES_ECO_DIR}
         ln -s {SPECIES_DIR}/pca_loadings_ecotype.txt pca_loadings.txt
-        ln -s {SPECIES_DIR}/list_core.txt list.txt
+        ln -s {SPECIES_DIR}/list_ecotype.txt list.txt
         '''
 
 rule create_id_title:

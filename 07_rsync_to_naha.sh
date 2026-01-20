@@ -3,7 +3,7 @@ DESTINATION_ATTED_DIR=daffa@naha:/db/atted/datastock
 
 SOURCE_ATTED_DIR=/home/daffa/Work/2025/11-ATTED-II_ver-13.0/upload/
 FILES_TO_COPY=(
-    "./coex_unzip/Ghi-r.c1-0"
+    "./coex"
 )
 
 for file in ${FILES_TO_COPY[@]}; do
