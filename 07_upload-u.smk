@@ -49,7 +49,7 @@ if num_s.replace('S', '') == num_p.replace('G', ''):
         num_s = f'S{sum(1 for line in f)}'
 
 num_ps = '-'.join([num_p, num_s])
-PRIV_VER = '.'.join(parts[1:3] + [num_ps] + parts[4:6])  
+PRIV_VER = '.'.join(parts[1:3] + [num_ps] + parts[4:])  
 PRIV_DIR = f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d"
 
 # Create "from" content for union (lists both microarray and RNA versions)

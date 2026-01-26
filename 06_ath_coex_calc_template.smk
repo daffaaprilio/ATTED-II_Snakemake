@@ -36,12 +36,16 @@ rule all:
         f"{SPECIES_ECO_DIR}/id-id-title.txt",
         f"{SPECIES_CORE_DIR}/id-id-title.txt",
         f"{SPECIES_ECO_DIR}/study_info.txt",
+        f"{SPECIES_ECO_DIR}/run_info.txt",
+        f"{SPECIES_CORE_DIR}/study_info.txt",
         f"{SPECIES_CORE_DIR}/run_info.txt",
         f"{SPECIES_ECO_DIR}/pc_select_run.txt",
         f"{SPECIES_CORE_DIR}/pc_select_exp.txt",    
         f"{SPECIES_ECO_DIR}/pca_loadings.txt",
         f"{SPECIES_CORE_DIR}/pca_loadings.txt",
         f"{SPECIES_ECO_DIR}/04.table.txt",
+        f"{SPECIES_ECO_DIR}/04.url.txt", 
+        f"{SPECIES_CORE_DIR}/04.table.txt", 
         f"{SPECIES_CORE_DIR}/04.url.txt"
 
 rule attrib_info:
@@ -50,7 +54,7 @@ rule attrib_info:
     shell:
         '''
         python3 {WDIR}/scripts/1-PreSubsampling/x01-create-attrib-info0.py --taxonomy_id {TAXONOMY_ID}
-        echo "SRP279357\t\t1664\t\"male parent, female parent\"" >> ecotype.study
+        echo "SRP279357\t\t1664\t\"male parent, female parent\"" >> {SPECIES_DIR}/ecotype.study
         echo "SRP2793571664male parent, female parent, added to ecotype.study."
         '''
 
@@ -194,7 +198,7 @@ rule key_pair:
     shell:
         '''
         cd {SPECIES_DIR}
-        perl -lne 'chomp; push @k,$_ if $_=~/\w/; END{{for $i (0..$#k-1){{for $j ($i+1..$#k){{print "$k[$i]\t$k[$j]"}}}}}}' paste.*.combat_pca.probe > {output}
+        perl -lne 'chomp; push @k,$_ if $_=~/\w/; END{{for $i (0..$#k-1){{for $j ($i+1..$#k){{print "$k[$i]\t$k[$j]"}}}}}}' paste.*.core.probe > {output}
         '''
 
 rule subagging_coexpression:
@@ -228,10 +232,10 @@ rule z_scoring:
         '''
         echo "(5) Transform to table format, then z-scoring... (ecotype part)"
         cd {SPECIES_DIR}
-        mkdir {SPECIES_DIR}/tmp.nlmr_unsorted.ecotype
+        mkdir -p {SPECIES_DIR}/tmp.nlmr_unsorted.ecotype
         cd {SPECIES_DIR}/tmp.nlmr_unsorted.ecotype
         paste {input.key_pair} {input.coex_file_ecotype} | perl -lane '$mr{{$F[0]}}{{$F[1]}}=$F[2]; $mr{{$F[1]}}{{$F[0]}}=$F[2]; if ($. % 100000000 == 0){{for $g1 (keys %mr){{open OUT, ">>$g1"; for $g2 (keys %{{$mr{{$g1}}}}){{print OUT $g2,"\t",$mr{{$g1}}{{$g2}}}}}}; undef %mr}}; END{{for $g1 (keys %mr){{open OUT, ">>$g1"; for $g2 (keys %{{$mr{{$g1}}}}){{print OUT $g2,"\t",$mr{{$g1}}{{$g2}}}}}}}}'  
-        mkdir {SPECIES_DIR}/nlmr.d.ecotype
+        mkdir -p {SPECIES_DIR}/nlmr.d.ecotype
         for i in *; do
             perl -lane '$mr{{$F[0]}}=-$F[1]; END{{printf "%s\t%.2f\n", $ARGV, -log(1/$.)/log(2); for $g (sort {{$mr{{$b}}<=>$mr{{$a}}}} keys %mr){{printf "%s\t%.2f\n", $g, $mr{{$g}}}}}}' $i | uniq > ../nlmr.d.ecotype/$i;
         done
@@ -247,10 +251,10 @@ rule z_scoring:
         mv {SPECIES_DIR}/nlmr.d.ecotype.zscore {SPECIES_DIR}/nlmr.d.ecotype
         echo "(5) Transform to table format, then z-scoring... (core part)"
         cd {SPECIES_DIR}
-        mkdir {SPECIES_DIR}/tmp.nlmr_unsorted.core
+        mkdir -p {SPECIES_DIR}/tmp.nlmr_unsorted.core
         cd {SPECIES_DIR}/tmp.nlmr_unsorted.core
         paste {input.key_pair} {input.coex_file_core} | perl -lane '$mr{{$F[0]}}{{$F[1]}}=$F[2]; $mr{{$F[1]}}{{$F[0]}}=$F[2]; if ($. % 100000000 == 0){{for $g1 (keys %mr){{open OUT, ">>$g1"; for $g2 (keys %{{$mr{{$g1}}}}){{print OUT $g2,"\t",$mr{{$g1}}{{$g2}}}}}}; undef %mr}}; END{{for $g1 (keys %mr){{open OUT, ">>$g1"; for $g2 (keys %{{$mr{{$g1}}}}){{print OUT $g2,"\t",$mr{{$g1}}{{$g2}}}}}}}}'  
-        mkdir {SPECIES_DIR}/nlmr.d.core
+        mkdir -p {SPECIES_DIR}/nlmr.d.core
         for i in *; do
             perl -lane '$mr{{$F[0]}}=-$F[1]; END{{printf "%s\t%.2f\n", $ARGV, -log(1/$.)/log(2); for $g (sort {{$mr{{$b}}<=>$mr{{$a}}}} keys %mr){{printf "%s\t%.2f\n", $g, $mr{{$g}}}}}}' $i | uniq > ../nlmr.d.core/$i;
         done
