@@ -169,7 +169,7 @@ rule coexpression_data:
         '''
         mkdir -p {output.coex_unzip}
         rsync -a {input.nlmr_dir}/ {output.coex_unzip}/
-        zip -rq {output.coex_zip} {output.coex_unzip}/
+        cd {UPLOAD_DIR}/coex_unzip/{PUB_VER} && zip -r {output.coex_zip} {PRIV_VER}.{TYPE}.d/
         cp -p {input.c_path} {output.c_file} 
         '''
 

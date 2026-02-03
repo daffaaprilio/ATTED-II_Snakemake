@@ -44,13 +44,15 @@ ECOTYPE_SP_DIR = f"{WDIR}/Ath-r_ecotype"
 C_PATH_CORE = glob.glob(f"{ECOTYPE_SP_DIR}/79m_logit_mrgeo*.core.subagging.core.c")[0]
 C_FILE_CORE = Path(C_PATH_CORE).name
 # Extract PRIV_VER_CORE from filename: 79m_logit_mrgeo.{PRIV_VER}.combat_pca.core.subagging.core.c
-PRIV_VER_CORE = C_FILE_CORE.replace("79m_logit_mrgeo.", "").replace(".combat_pca.core.subagging.core.c", "")
+C_FILE_CORE = C_FILE_CORE.replace("-r_ecotype", "-r")
+PRIV_VER_CORE = C_FILE_CORE.replace("79m_logit_mrgeo.", "").replace(".combat_pca.core.subagging.core.c", ".combat_pca.subagging")
 
 # Ecotype version
 C_PATH_ECO = glob.glob(f"{ECOTYPE_SP_DIR}/79m_logit_mrgeo*.ecotype.subagging.ecotype.c")[0]
 C_FILE_ECO = Path(C_PATH_ECO).name
 # Extract PRIV_VER_ECO from filename: 79m_logit_mrgeo.{PRIV_VER}.combat_pca.ecotype.subagging.ecotype.c
-PRIV_VER_ECO = C_FILE_ECO.replace("79m_logit_mrgeo.", "").replace(".combat_pca.ecotype.subagging.ecotype.c", "")
+C_FILE_ECO = C_FILE_ECO.replace("-r_ecotype", "-e")
+PRIV_VER_ECO = C_FILE_ECO.replace("79m_logit_mrgeo.", "").replace(".combat_pca.ecotype.subagging.ecotype.c", ".combat_pca.subagging")
 
 # ==== Populate new data list (a .tsv file containing list of coex data to upload in the current ATTED-II version)
 new_line_core = f"{PUB_VER_CORE}\t{PRIV_VER_CORE}.{TYPE_CORE}.d"
@@ -211,7 +213,7 @@ rule coexpression_data_core:
         '''
         mkdir -p {output.coex_unzip}
         rsync -a {input.nlmr_dir}/ {output.coex_unzip}/
-        zip -rq {output.coex_zip} {output.coex_unzip}/
+        cd {UPLOAD_DIR}/coex_unzip/{PUB_VER_CORE} && zip -r {output.coex_zip} {PRIV_VER_CORE}.{TYPE_CORE}.d/
         cp -p {input.c_path} {output.c_file} 
         '''
 
@@ -354,7 +356,7 @@ rule coexpression_data_eco:
         '''
         mkdir -p {output.coex_unzip}
         rsync -a {input.nlmr_dir}/ {output.coex_unzip}/
-        zip -rq {output.coex_zip} {output.coex_unzip}/
+        cd {UPLOAD_DIR}/coex_unzip/{PUB_VER_ECO} && zip -r {output.coex_zip} {PRIV_VER_ECO}.{TYPE_ECO}.d/
         cp -p {input.c_path} {output.c_file} 
         '''
 

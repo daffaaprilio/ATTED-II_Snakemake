@@ -18,8 +18,8 @@ PUB_VER_RNA=(
     Mtr-r.c5-0
     Nta-r.c1-0
     Osa-r.c6-0
-    # Osi-r.c1-0
-    Osa-e.c1-0
+    Osi-r.c1-0
+    # Osa-e.c1-0
     Ppo-r.c4-0
     Sbi-r.c1-0
     Sly-r.c6-0
@@ -30,35 +30,41 @@ PUB_VER_RNA=(
 )
 
 PUB_VER_UNION=(
-    Mtr-u.c5-0
-    Osa-u.c5-0
-    Ppo-u.c5-0
-    Sly-u.c5-0
-    Vvi-u.c5-0
-    Zma-u.c5-0
+    Ath-u.c5-0
+    # Gma-u.c5-0
+    # Mtr-u.c5-0
+    # Osa-u.c5-0
+    # Ppo-u.c5-0
+    # Sly-u.c5-0
+    # Vvi-u.c5-0
+    # Zma-u.c5-0
 )
 
-out_file="${WDIR}/upload/ATTED-II_newDataList_2026_01.tsv"
+out_file="${WDIR}/upload/coex/ATTED-II_newDataList_2026_01.tsv"
 
-if [ ! -d "${WDIR}/upload" ] ; then
-    mkdir -p "${WDIR}/upload"
-fi
-
-if [ ! -f "${out_file}" ] ; then
-    touch "${out_file}"
-fi
-
-# run snakemake
-printf '%s\n' "${PUB_VER_RNA[@]}" | xargs -P 17 -I {} snakemake -c 1 -s ${WDIR}/07_upload-r.smk --config 'public_version'={} 'out_file'=${out_file}
-printf '%s\n' "${PUB_VER_UNION[@]}" | xargs -P 6 -I {} snakemake -c 1 -s ${WDIR}/07_upload-u.smk --config 'public_version'={} 'out_file'=${out_file}
-
-# rename Osi-r into Osa-e
-# if [ -d "upload" ] && [ ! -d "upload/coex/Osa-e.c1-0" ]; then
-#   grep -rl "Osi-r" upload 2>/dev/null | xargs -r sed -i 's/Osi-r/Osa-e/g'
-#   find upload -type f -name '*Osi-r*' -exec bash -c 'mv "$1" "${1//Osi-r/Osa-e}" 2>/dev/null || true' _ {} \;
-#   find upload -depth -type d -name '*Osi-r*' -exec bash -c 'mv "$1" "${1//Osi-r/Osa-e}" 2>/dev/null || true' _ {} \;
+# if [ ! -d "${WDIR}/upload/coex" ] ; then
+#     mkdir -p "${WDIR}/upload/coex"
 # fi
 
+# if [ ! -f "${out_file}" ] ; then
+#     touch "${out_file}"
+# fi
 
+# run snakemake
+# snakemake -c 1 -s ${WDIR}/07_upload_Ath.smk --config 'public_version_core'=Ath-r.c7-0 'public_version_eco'=Ath-e.c2-0 'out_file'=${out_file}
+# printf '%s\n' "${PUB_VER_RNA[@]}" | xargs -P 18 -I {} snakemake -c 1 -s ${WDIR}/07_upload-r.smk --config 'public_version'={} 'out_file'=${out_file}
+printf '%s\n' "${PUB_VER_UNION[@]}" | xargs -P 8 -I {} snakemake -c 1 -s ${WDIR}/07_upload-u.smk --config 'public_version'={} 'out_file'=${out_file}
+
+# rename Osi-r into Osa-e
+# if [ -d "upload" ]; then
+#   # Replace text content in files
+#   grep -rl "Osi-r" upload 2>/dev/null | xargs -r sed -i 's/Osi-r/Osa-e/g'
+#   # Rename files containing Osi-r
+#   find upload -type f -name '*Osi-r*' -exec bash -c 'mv "$1" "${1//Osi-r/Osa-e}" 2>/dev/null || true' _ {} \;
+#   # Rename directories containing Osi-r (depth-first to handle nested directories)
+#   find upload -depth -type d -name '*Osi-r*' -exec bash -c 'mv "$1" "${1//Osi-r/Osa-e}" 2>/dev/null || true' _ {} \;
+# fi
+# removing snakemake time stamp once finished
+find upload/ -type f -name '*.snakemake_timestamp*' -exec rm {} +
 
 

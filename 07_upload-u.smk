@@ -27,10 +27,14 @@ c_files = glob.glob(f"{UPLOAD_DIR}/coex/{SP[:3]}-r*/79m_logit_mrgeo*.c")
 if not c_files:
     raise ValueError(f"No C file found in RNA version directory for {SP[:3]}-r")
 
-C_PATH = c_files[0]  # full path to the C file (of the RNA version)
+C_PATH = c_files[0]  # full path to the C file (of the RNA version). for Ath, it is ['./upload/coex/Ath-r.c7-0/79m_logit_mrgeo.Ath-r.v26-01.P19674-S19674.combat_pca.core.subagging.core.c']
 C_FILE = Path(C_PATH).name  # just the full name of the C file
 stem = Path(C_PATH).stem
-stem = stem.replace('-r', '-u') # rename private version from -r to -u
+if 'Ath' in stem:
+    stem = stem.replace('-r', '-u')
+    stem = stem.replace('combat_pca.core.subagging.core', 'combat_pca.subagging')
+else:
+    stem = stem.replace('-r', '-u') # rename private version from -r to -u
 parts = stem.split('.')
 
 # determine num p and num s for this union version
@@ -82,7 +86,8 @@ print(f"=== Processing UNION version: {PUB_VER} ===")
 rule all:
     input:
         f"{PUB_DIR}/date", f"{PUB_DIR}/method", f"{PUB_DIR}/type", f"{PUB_DIR}/KEGG", f"{PUB_DIR}/from", f"{PUB_DIR}/genes.txt",
-        f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d/"
+        f"{UPLOAD_DIR}/coex_unzip/{PUB_VER}/{PRIV_VER}.{TYPE}.d/", f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip",
+        f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.md5.txt", f"{PUB_DIR}/{PRIV_VER}.{TYPE}.d.zip.sha256.txt"
 
 # information files
 rule official_date:
@@ -153,7 +158,7 @@ rule coexpression_data:
         '''
         mkdir -p {output.coex_unzip}
         rsync -a {input.union_dir}/ {output.coex_unzip}/
-        zip -rq {output.coex_zip} {output.coex_unzip}/
+        cd {UPLOAD_DIR}/coex_unzip/{PUB_VER} && zip -r {output.coex_zip} {PRIV_VER}.{TYPE}.d/
         '''
 
 # checksums
