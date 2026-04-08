@@ -1,6 +1,6 @@
 #------------------------------------------------------------
 # Load configuration
-configfile: '01_refseq_prep.yaml'
+configfile: 'config/data_preparation.yaml'
 
 SPECIES_LIST = config['species_id']
 TAXID_LIST = config['taxonomy_id']

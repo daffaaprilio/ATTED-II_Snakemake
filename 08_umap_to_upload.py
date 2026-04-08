@@ -21,8 +21,8 @@ for items in TARGET_UPLOAD_PATH.iterdir():
         None
 
 # postpone Tae
-UPLOAD_DIRS = [i for i in UPLOAD_DIRS if 'Tae-r' not in str(i)]
-UMAP_RESULTS = [i for i in UMAP_RESULTS if 'Tae-r' not in str(i)]
+# UPLOAD_DIRS = [i for i in UPLOAD_DIRS if 'Tae-r' not in str(i)]
+# UMAP_RESULTS = [i for i in UMAP_RESULTS if 'Tae-r' not in str(i)]
 
 # Get species from upload dirs - extract just the species part before .c
 upload_species = {d.name.split('.')[0] for d in UPLOAD_DIRS}
