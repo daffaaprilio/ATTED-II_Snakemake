@@ -1,4 +1,4 @@
-configfile: '02_data_prep.yaml'
+configfile: 'config/data_preparation.yaml'
 
 import os
 import datetime

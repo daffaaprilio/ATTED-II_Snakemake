@@ -32,3 +32,36 @@ Make sure to check the config file `config/data_preparation.yaml` to:
 # Run the refseq snakefile script (after setting up the conda environment and installing Snakemake there)
 snakemake -s 01_refseq_prep.smk -c 1
 ```
+
+### Preparing Input Files for Coexpression Calculation
+```shell
+snakemake -s 02_data_prep.smk -c 1
+```
+Then, for each species, run this snakefile. It is important to run each snakefile individually, in order to not flood the system. Use as much cores when necessary (16 is optimal, out of 48 cores in cosmo)
+```shell
+# example for species_id='Hvu' and taxonomy_id=4513
+snakemake -s 03_expression_data.smk -c 8 --config species_id='Hvu' taxonomy_id=4513 -np
+```
+
+### Coexpression calculation
+Determine the calculation method: microarray (prefix: -m), RNA-seq (-r), union (-u) for each species. Consult the coexpression data table (https://atted.jp/download/) for the current list of species and each co-expression calculation prefix.
+```shell
+# RNA-based case: Hvu-r
+snakemake -s 04_coex_calc_prep.smk --config species_id='Hvu' taxonomy_id=4513 -c 1
+# Microarray case: Xxx-m
+# since there are no microarray for the recent ATTED-II update, this is not implemented
+# Union case: Xxx-u
+snakemake -s 04_union_coex_calc_prep.smk --config species_id='Xxx' taxonomy_id=1111 -c 1
+```
+For each snakemake, this will create a species directory, i.e., `Ath-u/`, `Ath-r/`, `Sbi-r/`, etc. (*Arabidopsis thaliana* union, RNA-based, and *Sorghum bicolor* RNA-based gene co-expression calculation, respectively).
+```shell
+# go to species directory
+cd Hvu-r/
+# then, run the Snakefile inside
+Snakemake -s run.smk
+```
+
+### Evaluation Data Preparation
+```shell
+snakemake -s 05_eval_prep.smk -c 1 -p
+```

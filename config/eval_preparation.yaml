@@ -26,6 +26,7 @@ species_id:
   - Vvi
   - Zma
   - Tae
+  - Hvu
 
 taxonomy_id:
   - 4558
@@ -47,6 +48,7 @@ taxonomy_id:
   - 29760
   - 4577
   - 4565
+  - 4513
 
 genes_ko_list_download: https://ftp.kegg.net/kegg/genes/links/genes_ko.list.gz
 genes_pathway_list_download: https://ftp.kegg.net/kegg/genes/links/genes_pathway.list.gz
@@ -55,4 +57,4 @@ genes_id_download: https://ftp.kegg.net/kegg/genes/links/genes_ncbi-geneid.list.
 kegg_ftp_pass: YmYx-Yjcw-YjM5-YmMw
 kegg_ftp_user: ac01093
 
-date_suffix: 2025-12-15
+date_suffix: 2026-04-08
