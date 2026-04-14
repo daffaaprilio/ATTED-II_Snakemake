@@ -42,6 +42,7 @@ rule main:
         taxonomy_id = TAXONOMY_ID,
         species_id = SPECIES_ID,
         wdir = WDIR
+    threads: 2
     shell:
         '''
         zsh {input.cmd} {params.url} {params.taxonomy_id} {params.species_id} {params.wdir}

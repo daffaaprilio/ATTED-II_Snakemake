@@ -32,16 +32,26 @@ Make sure to check the config file `config/data_preparation.yaml` to:
 # Run the refseq snakefile script (after setting up the conda environment and installing Snakemake there)
 snakemake -s 01_refseq_prep.smk -c 1
 ```
+> About Snakemake Arguments <br>
+[Snakemake](https://snakemake.readthedocs.io/en/stable/) is used to manage the workflow steps. Several arguments used quite often: <br>
+`-n`: dry run <br>
+`-s`: specify the Snakefile path to use <br>
+`-p`: print the shell commands that will be executed for each rule <br>
+`-c`: number of CPU cores <br>
+`-j`: number of concurrent jobs <br>
+
 
 ### Preparing Input Files for Coexpression Calculation
 ```shell
 snakemake -s 02_data_prep.smk -c 1
 ```
-Then, for each species, run this snakefile. It is important to run each snakefile individually, in order to not flood the system. Use as much cores when necessary (16 is optimal, out of 48 cores in cosmo)
+Then, for each species, run this snakefile. It is important to run each snakefile individually, in order to not flood the system. Use as much cores when necessary (12 is optimal, out of 48 cores in cosmo, be advised that a Bowtie job requires 2 CPU).
 ```shell
 # example for species_id='Hvu' and taxonomy_id=4513
-snakemake -s 03_expression_data.smk -c 8 --config species_id='Hvu' taxonomy_id=4513 -np
+snakemake -s 03_expression_data.smk -c 12 --config species_id='Hvu' taxonomy_id=4513 -np --keep-going
 ```
+> About `--keep-going` argument <br>
+With `--keep-going` flag, Snakemake will continue scheduling the remaining jobs even when individual ones fail.
 
 ### Coexpression calculation
 Determine the calculation method: microarray (prefix: -m), RNA-seq (-r), union (-u) for each species. Consult the coexpression data table (https://atted.jp/download/) for the current list of species and each co-expression calculation prefix.
