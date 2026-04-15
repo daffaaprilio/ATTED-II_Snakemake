@@ -21,6 +21,7 @@ VALID_NUM = config.get('valid_num', '') if config.get('valid_num', '') else 1000
 SAMPLING_RATE = config.get('sampling_rate', '') if config.get('sampling_rate', '') else 50
 KEGG_ftp_date = "2025-12-15"
 EVAL_DATE = datetime.now().strftime('%Y-%m-%d')
+LOG_DATETIME = datetime.now().strftime('%Y%m%d_%H%M%S')
 EVAL_CORE_OUTPUT = f"{SPECIES_DIR}/score.KEGG50.KEGG.{KEGG_ftp_date}.{SP}.core.{EVAL_DATE}"
 EVAL_ECOTYPE_OUTPUT = f"{SPECIES_DIR}/score.KEGG50.KEGG.{KEGG_ftp_date}.{SP}.ecotype.{EVAL_DATE}"
 
@@ -51,8 +52,11 @@ rule all:
 rule attrib_info:
     output:
         f"{SPECIES_DIR}/ecotype.study"
+    log:
+        f"{SPECIES_DIR}/logs/attrib_info.{LOG_DATETIME}.log"
     shell:
         '''
+        exec > {log} 2>&1
         python3 {WDIR}/scripts/1-PreSubsampling/x01-create-attrib-info0.py --taxonomy_id {TAXONOMY_ID}
         echo "SRP279357\t\t1664\t\"male parent, female parent\"" >> {SPECIES_DIR}/ecotype.study
         echo "SRP2793571664male parent, female parent, added to ecotype.study."
@@ -75,10 +79,12 @@ rule combat_pca:
         f"{SPECIES_DIR}/paste.expression.combat",
         f"{SPECIES_DIR}/pca_loadings_ecotype.txt",
         f"{SPECIES_DIR}/pca_loadings_core.txt"
+    log:
+        f"{SPECIES_DIR}/logs/combat_pca.{LOG_DATETIME}.log"
     shell:
         '''
         cd {WDIR}
-        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.ecotype.R -s {SP} -p {params.pca}
+        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.ecotype.R -s {SP} -p {params.pca} > {log} 2>&1
         '''
 
 rule loading_annotation_prep:
@@ -92,8 +98,11 @@ rule loading_annotation_prep:
         f"{SPECIES_ECO_DIR}/list.txt",
         f"{SPECIES_CORE_DIR}/pca_loadings.txt",
         f"{SPECIES_ECO_DIR}/pca_loadings.txt"
+    log:
+        f"{SPECIES_DIR}/logs/loading_annotation_prep.{LOG_DATETIME}.log"
     shell:
         '''
+        exec > {log} 2>&1
         echo "loading annotation for Core"
         cd {SPECIES_CORE_DIR}
         ln -s {SPECIES_DIR}/pca_loadings_core.txt pca_loadings.txt
@@ -112,11 +121,13 @@ rule create_id_title:
     output:
         f"{SPECIES_CORE_DIR}/id-id-title.txt",
         f"{SPECIES_ECO_DIR}/id-id-title.txt"
+    log:
+        f"{SPECIES_DIR}/logs/create_id_title.{LOG_DATETIME}.log"
     shell:
         '''
         cd {WDIR}
-        python3 {WDIR}/scripts/1-PreSubsampling/x-61-create-id-id-title.py --sp {SP_ECO}
-        python3 {WDIR}/scripts/1-PreSubsampling/x-61-create-id-id-title.py --sp {SP_CORE}
+        python3 {WDIR}/scripts/1-PreSubsampling/x-61-create-id-id-title.py --sp {SP_ECO} > {log} 2>&1
+        python3 {WDIR}/scripts/1-PreSubsampling/x-61-create-id-id-title.py --sp {SP_CORE} >> {log} 2>&1
         '''
 
 rule create_info:
@@ -129,11 +140,13 @@ rule create_info:
         f"{SPECIES_CORE_DIR}/run_info.txt",
         f"{SPECIES_ECO_DIR}/study_info.txt",
         f"{SPECIES_ECO_DIR}/run_info.txt"
+    log:
+        f"{SPECIES_DIR}/logs/create_info.{LOG_DATETIME}.log"
     shell:
         '''
         cd {WDIR}
-        python3 {WDIR}/scripts/1-PreSubsampling/x-62-info-txt.py --sp {SP_CORE}
-        python3 {WDIR}/scripts/1-PreSubsampling/x-62-info-txt.py --sp {SP_ECO}
+        python3 {WDIR}/scripts/1-PreSubsampling/x-62-info-txt.py --sp {SP_CORE} > {log} 2>&1
+        python3 {WDIR}/scripts/1-PreSubsampling/x-62-info-txt.py --sp {SP_ECO} >> {log} 2>&1
         '''
 
 rule selecting:
@@ -148,29 +161,33 @@ rule selecting:
         f"{SPECIES_ECO_DIR}/pc_select_run.txt",
         f"{SPECIES_ECO_DIR}/pc_select_exp.txt",
         f"{SPECIES_CORE_DIR}/pc_select_run.txt",
-        f"{SPECIES_CORE_DIR}/pc_select_exp.txt"            
+        f"{SPECIES_CORE_DIR}/pc_select_exp.txt"
+    log:
+        f"{SPECIES_DIR}/logs/selecting.{LOG_DATETIME}.log"
     shell:
         '''
         cd {WDIR}
-        Rscript {WDIR}/scripts/2-Subsampling/x-72-select.R -s {SP_ECO}
-        Rscript {WDIR}/scripts/2-Subsampling/x-72-select.R -s {SP_CORE}
+        Rscript {WDIR}/scripts/2-Subsampling/x-72-select.R -s {SP_ECO} > {log} 2>&1
+        Rscript {WDIR}/scripts/2-Subsampling/x-72-select.R -s {SP_CORE} >> {log} 2>&1
         '''
 
 rule formatting:
     input:
         f"{SPECIES_CORE_DIR}/pc_select_run.txt",
-        f"{SPECIES_ECO_DIR}/pc_select_run.txt" 
+        f"{SPECIES_ECO_DIR}/pc_select_run.txt"
     output:
         f"{SPECIES_ECO_DIR}/04.table.txt",
         f"{SPECIES_ECO_DIR}/04.url.txt",
         f"{SPECIES_CORE_DIR}/04.table.txt",
         f"{SPECIES_CORE_DIR}/04.url.txt"
+    log:
+        f"{SPECIES_DIR}/logs/formatting.{LOG_DATETIME}.log"
     shell:
         '''
         cd {SPECIES_ECO_DIR}
-        {WDIR}/scripts/2-Subsampling/x-73-formating.pl
+        {WDIR}/scripts/2-Subsampling/x-73-formating.pl > {log} 2>&1
         cd {SPECIES_CORE_DIR}
-        {WDIR}/scripts/2-Subsampling/x-73-formating.pl
+        {WDIR}/scripts/2-Subsampling/x-73-formating.pl >> {log} 2>&1
         '''
 
 rule binary_expression:
@@ -182,11 +199,13 @@ rule binary_expression:
         version = datetime.now().strftime("%y.%m")
     output:
         temp(f"{SPECIES_DIR}/.binary_expression_marker")
+    log:
+        f"{SPECIES_DIR}/logs/binary_expression.{LOG_DATETIME}.log"
     shell:
         '''
         cd {WDIR}
-        {WDIR}/scripts/2-Subsampling/x-44-paste_gc_data.pl -s {SP} -v {params.version} -d gc.d.ecotype -m combat_pca.ecotype
-        {WDIR}/scripts/2-Subsampling/x-44-paste_gc_data.pl -s {SP} -v {params.version} -d gc.d.core -m combat_pca.core
+        {WDIR}/scripts/2-Subsampling/x-44-paste_gc_data.pl -s {SP} -v {params.version} -d gc.d.ecotype -m combat_pca.ecotype > {log} 2>&1
+        {WDIR}/scripts/2-Subsampling/x-44-paste_gc_data.pl -s {SP} -v {params.version} -d gc.d.core -m combat_pca.core >> {log} 2>&1
         touch {output}
         '''
 
@@ -195,10 +214,12 @@ rule key_pair:
         f"{SPECIES_DIR}/.binary_expression_marker"
     output:
         f"{SPECIES_DIR}/key_pair"
+    log:
+        f"{SPECIES_DIR}/logs/key_pair.{LOG_DATETIME}.log"
     shell:
         '''
         cd {SPECIES_DIR}
-        perl -lne 'chomp; push @k,$_ if $_=~/\w/; END{{for $i (0..$#k-1){{for $j ($i+1..$#k){{print "$k[$i]\t$k[$j]"}}}}}}' paste.*.core.probe > {output}
+        perl -lne 'chomp; push @k,$_ if $_=~/\w/; END{{for $i (0..$#k-1){{for $j ($i+1..$#k){{print "$k[$i]\t$k[$j]"}}}}}}' paste.*.core.probe > {output} 2> {log}
         '''
 
 rule subagging_coexpression:
@@ -211,11 +232,13 @@ rule subagging_coexpression:
     output:
         protected(f"{SPECIES_DIR}/subagging.ecotype.logitMR.ave_{SUBAGGING_AVE}"),
         protected(f"{SPECIES_DIR}/subagging.core.logitMR.ave_{SUBAGGING_AVE}")
+    log:
+        f"{SPECIES_DIR}/logs/subagging_coexpression.{LOG_DATETIME}.log"
     shell:
         '''
         cd {SPECIES_DIR}
-        {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.ecotype.bin -o subagging.ecotype -n {params.subagging} -s {params.sampling_rate} -v {params.valid_num} -c
-        {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.core.bin -o subagging.core -n {params.subagging} -s {params.sampling_rate} -v {params.valid_num} -c
+        {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.ecotype.bin -o subagging.ecotype -n {params.subagging} -s {params.sampling_rate} -v {params.valid_num} -c > {log} 2>&1
+        {WDIR}/scripts/2-Subsampling/x-45-coex_subagging_unsigned_int.pl -e -i paste.*.combat_pca.core.bin -o subagging.core -n {params.subagging} -s {params.sampling_rate} -v {params.valid_num} -c >> {log} 2>&1
         '''
 
 rule z_scoring:
@@ -228,8 +251,11 @@ rule z_scoring:
         directory(f"{SPECIES_DIR}/nlmr.d.ecotype.beforezscore"),
         directory(f"{SPECIES_DIR}/nlmr.d.core"),
         directory(f"{SPECIES_DIR}/nlmr.d.core.beforezscore")
+    log:
+        f"{SPECIES_DIR}/logs/z_scoring.{LOG_DATETIME}.log"
     shell:
         '''
+        exec > {log} 2>&1
         echo "(5) Transform to table format, then z-scoring... (ecotype part)"
         cd {SPECIES_DIR}
         mkdir -p {SPECIES_DIR}/tmp.nlmr_unsorted.ecotype
@@ -279,11 +305,13 @@ rule evaluation:
         kegg_date = KEGG_ftp_date,
         cutSP = cutSP
     output:
-        output_ecotype = EVAL_ECOTYPE_OUTPUT, 
+        output_ecotype = EVAL_ECOTYPE_OUTPUT,
         output_core = EVAL_CORE_OUTPUT
+    log:
+        f"{SPECIES_DIR}/logs/evaluation.{LOG_DATETIME}.log"
     shell:
         '''
         cd {SPECIES_DIR}
-        {WDIR}/Eval/score_excl_paralog_pair.pl -s {params.cutSP} -K {WDIR}/Eval/KEGG.{params.kegg_date}/KEGG50 -g {WDIR}/Eval/ko-genes.{params.kegg_date}/{params.cutSP} -f {input.coex_file_ecotype} -p {input.key_pair} -o {output.output_ecotype} || true
-        {WDIR}/Eval/score_excl_paralog_pair.pl -s {params.cutSP} -K {WDIR}/Eval/KEGG.{params.kegg_date}/KEGG50 -g {WDIR}/Eval/ko-genes.{params.kegg_date}/{params.cutSP} -f {input.coex_file_core} -p {input.key_pair} -o {output.output_core} || true
+        {WDIR}/Eval/score_excl_paralog_pair.pl -s {params.cutSP} -K {WDIR}/Eval/KEGG.{params.kegg_date}/KEGG50 -g {WDIR}/Eval/ko-genes.{params.kegg_date}/{params.cutSP} -f {input.coex_file_ecotype} -p {input.key_pair} -o {output.output_ecotype} > {log} 2>&1 || true
+        {WDIR}/Eval/score_excl_paralog_pair.pl -s {params.cutSP} -K {WDIR}/Eval/KEGG.{params.kegg_date}/KEGG50 -g {WDIR}/Eval/ko-genes.{params.kegg_date}/{params.cutSP} -f {input.coex_file_core} -p {input.key_pair} -o {output.output_core} >> {log} 2>&1 || true
         '''

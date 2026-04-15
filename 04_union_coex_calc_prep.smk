@@ -1,5 +1,5 @@
 
-WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
+WDIR = config['wdir']
 LEGACY_DIR = "/home/hibara/ATTED-II_ver.11.0"
 SPECIES_ID = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']

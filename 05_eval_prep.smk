@@ -1,23 +1,23 @@
 configfile: 'config/eval_preparation.yaml'
 
-SPECIES_ID = config['species_id']
-TAXONOMY_ID = config['taxonomy_id']
-WDIR=config['wdir']
-GENES_KO_LIST_DOWNLOAD=config['genes_ko_list_download']
-GENES_PATHWAY_LIST_DOWNLOAD=config['genes_pathway_list_download']
-GENES_ID_LIST_DOWNLOAD=config['genes_id_download']
-KEGG_FTP_PASS=config['kegg_ftp_pass']
-KEGG_FTP_USER=config['kegg_ftp_user']
-DATE_SUFFIX=config['date_suffix']
+SPECIES_ID      = config['species_id']
+TAXONOMY_ID     = config['taxonomy_id']
+WDIR            = config['wdir']
+GENES_KO_LIST_DOWNLOAD      = config['genes_ko_list_download']
+GENES_PATHWAY_LIST_DOWNLOAD = config['genes_pathway_list_download']
+GENES_ID_LIST_DOWNLOAD      = config['genes_id_download']
+KEGG_FTP_PASS   = config['kegg_ftp_pass']
+KEGG_FTP_USER   = config['kegg_ftp_user']
+DATE_SUFFIX = config['date_suffix']
 
-EVAL_DIR=f"{WDIR}/Eval"
-KEGGFULL=f"{EVAL_DIR}/KEGG.{DATE_SUFFIX}/KEGGfull/{{species}}"
-KEGG50=f"{EVAL_DIR}/KEGG.{DATE_SUFFIX}/KEGG50/{{species}}"
-PARALOGS=f"{EVAL_DIR}/ko-genes.{DATE_SUFFIX}/{{species}}"
+EVAL_DIR    = f"{WDIR}/Eval"
+KEGGFULL    = f"{EVAL_DIR}/KEGG.{DATE_SUFFIX}/KEGGfull/{{species}}"
+KEGG50      = f"{EVAL_DIR}/KEGG.{DATE_SUFFIX}/KEGG50/{{species}}"
+PARALOGS    = f"{EVAL_DIR}/ko-genes.{DATE_SUFFIX}/{{species}}"
 
-ALL_KEGGFULL = expand(KEGGFULL, species=SPECIES_ID)
-ALL_KEGG50 = expand(KEGG50, species=SPECIES_ID)
-ALL_PARALOGS = expand(PARALOGS, species=SPECIES_ID)
+ALL_KEGGFULL    = expand(KEGGFULL, species=SPECIES_ID)
+ALL_KEGG50      = expand(KEGG50, species=SPECIES_ID)
+ALL_PARALOGS    = expand(PARALOGS, species=SPECIES_ID)
 
 rule all:
     input:

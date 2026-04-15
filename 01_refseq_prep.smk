@@ -6,6 +6,7 @@ SPECIES_LIST = config['species_id']
 TAXID_LIST = config['taxonomy_id']
 DOWNLOAD_REFGEN_DICT = config['download_refgen_dict']
 DOWNLOAD_ANNOT_DICT = config['download_annot_dict']
+WDIR = config['wdir']
 
 #------------------------------------------------------------
 # Helper function
@@ -25,8 +26,8 @@ ANNOT_FILES = {species: get_filename(url) for species, url in DOWNLOAD_ANNOT_DIC
 #------------------------------------------------------------
 # Specifying directory path
 
-REFSEQ_DIR = '/home/daffa/Work/2025/11-ATTED-II_ver-13.0/refseq'
-INDEX_DIR = '/home/daffa/Work/2025/11-ATTED-II_ver-13.0/index'
+REFSEQ_DIR = '{WDIR}/refseq'
+INDEX_DIR = '{WDIR}/index'
 
 #------------------------------------------------------------
 # Specifying single file input
@@ -34,14 +35,14 @@ INDEX_DIR = '/home/daffa/Work/2025/11-ATTED-II_ver-13.0/index'
 GENE_SEQ = REFSEQ_DIR + '/{species}_gene_seq'
 ANNOTATION = REFSEQ_DIR + '/{species}_annotation'
 EGI = REFSEQ_DIR + '/{species}-r_SpeciesSpecific2EGI'
-INDEX = INDEX_DIR + '/{taxid}.{ext}'
+INDEX = INDEX_DIR + '/{taxid}.done'
 
 #------------------------------------------------------------
 # Expanded file lists for all species and taxid
 ALL_GENE_SEQ = expand(GENE_SEQ, species=SPECIES_LIST)
 ALL_ANNOTATION = expand(ANNOTATION, species=SPECIES_LIST)
 ALL_EGI = expand(EGI, species=SPECIES_LIST)
-ALL_INDEX = expand(INDEX, taxid=TAXID_LIST, ext=['1.bt2','2.bt2','3.bt2','4.bt2','rev.1.bt2','rev.2.bt2'])
+ALL_INDEX = expand(INDEX, taxid=TAXID_LIST)
 
 #------------------------------------------------------------
 # Rules
@@ -75,10 +76,12 @@ rule bowtie_index:
     input:
         lambda wildcards: f"{REFSEQ_DIR}/{[species for species, taxid in SPECIES_TO_TAXID.items() if str(taxid) == wildcards.taxid][0]}_gene_seq"
     output:
-        expand(INDEX_DIR + "/{{taxid}}.{ext}", ext=['1.bt2','2.bt2','3.bt2','4.bt2','rev.1.bt2','rev.2.bt2'])
+        # expand(INDEX_DIR + "/{{taxid}}.{ext}", ext=['1.bt2','2.bt2','3.bt2','4.bt2','rev.1.bt2','rev.2.bt2'])
+        INDEX_DIR + "/{{taxid}}.done"
     shell:
         '''
         bowtie2-build -f {input} {INDEX_DIR}/{wildcards.taxid}
+        touch {output}
         '''
 
 ## Annotation processing
