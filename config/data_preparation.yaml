@@ -1,0 +1,26 @@
+# ------------------------------------------------------------
+# BEFORE RUNNING SNAKEMAKE
+# Don't forget to activate the "atted" conda environment
+
+# directory to store the output files
+wdir: "/home/daffa/Work/2026/04-ATTED_II_ver-13.1_Eagle_Tae"
+
+# link for downloading reference genome and annotation
+download_refgen_dict:
+  Tae: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/018/294/505/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1_genomic.fna.gz"
+
+download_annot_dict:
+  Tae: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/018/294/505/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1_genomic.gff.gz"
+
+# path of the metadata database
+metadataDB: "srainfo.sqlite3"
+
+# list of target organisms' ID
+species_id:
+  - Tae
+
+taxonomy_id:
+  - 4565
+
+# list of NG words to filter SRA run/study
+NG_words: ["platform", "mix", "agilent", "technolog", "labeling", "Polysome", "polysome", "small RNA"]

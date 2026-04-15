@@ -1,4 +1,5 @@
 configfile: 'config/eval_preparation.yaml'
+configfile: 'config/secrets.yaml'
 
 SPECIES_ID      = config['species_id']
 TAXONOMY_ID     = config['taxonomy_id']
