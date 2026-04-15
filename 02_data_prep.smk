@@ -1,4 +1,5 @@
 configfile: 'config/data_preparation.yaml'
+configfile: 'config/secrets.yaml'
 
 import os
 import datetime

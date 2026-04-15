@@ -1,26 +1,97 @@
-# ------------------------------------------------------------
-# BEFORE RUNNING SNAKEMAKE
-# Don't forget to activate the "atted" conda environment
-
-# directory to store the output files
-wdir: "/home/daffa/Work/2026/04-ATTED_II_ver-13.1_Eagle_Tae"
 
 # link for downloading reference genome and annotation
 download_refgen_dict:
+  Sbi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/003/195/GCF_000003195.3_Sorghum_bicolor_NCBIv3/GCF_000003195.3_Sorghum_bicolor_NCBIv3_genomic.fna.gz"
+  Ghi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/007/990/345/GCF_007990345.1_Gossypium_hirsutum_v2.1/GCF_007990345.1_Gossypium_hirsutum_v2.1_genomic.fna.gz"
+  Bna: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/020/379/485/GCF_020379485.1_Da-Ae/GCF_020379485.1_Da-Ae_genomic.fna.gz"
+  Cre: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/002/595/GCF_000002595.2_Chlamydomonas_reinhardtii_v5.5/GCF_000002595.2_Chlamydomonas_reinhardtii_v5.5_genomic.fna.gz"
+  Sot: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/226/075/GCF_000226075.1_SolTub_3.0/GCF_000226075.1_SolTub_3.0_genomic.fna.gz"
+  Osi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/433/935/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna.gz"
+  Cit: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/022/201/045/GCF_022201045.2_DVS_A1.0/GCF_022201045.2_DVS_A1.0_genomic.fna.gz"
+  Bdi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/505/GCF_000005505.3_Brachypodium_distachyon_v3.0/GCF_000005505.3_Brachypodium_distachyon_v3.0_genomic.fna.gz"
+  Nta: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/715/075/GCF_000715075.1_ASM71507v2/GCF_000715075.1_ASM71507v2_genomic.fna.gz"
+  Ath: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/735/GCF_000001735.4_TAIR10.1/GCF_000001735.4_TAIR10.1_genomic.fna.gz"
+  Bra: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/309/985/GCF_000309985.2_CAAS_Brap_v3.01/GCF_000309985.2_CAAS_Brap_v3.01_genomic.fna.gz"
+  Gma: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/004/515/GCF_000004515.6_Glycine_max_v4.0/GCF_000004515.6_Glycine_max_v4.0_genomic.fna.gz"
+  Mtr: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/003/473/485/GCF_003473485.1_MtrunA17r5.0-ANR/GCF_003473485.1_MtrunA17r5.0-ANR_genomic.fna.gz"
+  Osa: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/433/935/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna.gz"
+  Ppo: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/002/775/GCF_000002775.4_Pop_tri_v3/GCF_000002775.4_Pop_tri_v3_genomic.fna.gz"
+  Sly: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/188/115/GCF_000188115.5_SL3.1/GCF_000188115.5_SL3.1_genomic.fna.gz"
+  Vvi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/003/745/GCF_000003745.3_12X/GCF_000003745.3_12X_genomic.fna.gz"
+  Zma: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/902/167/145/GCF_902167145.1_Zm-B73-REFERENCE-NAM-5.0/GCF_902167145.1_Zm-B73-REFERENCE-NAM-5.0_genomic.fna.gz"
   Tae: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/018/294/505/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1_genomic.fna.gz"
+  Hvu: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/904/849/725/GCF_904849725.1_MorexV3_pseudomolecules_assembly/GCF_904849725.1_MorexV3_pseudomolecules_assembly_genomic.fna.gz"
 
 download_annot_dict:
+  Sbi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/003/195/GCF_000003195.3_Sorghum_bicolor_NCBIv3/GCF_000003195.3_Sorghum_bicolor_NCBIv3_genomic.gff.gz"
+  Ghi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/007/990/345/GCF_007990345.1_Gossypium_hirsutum_v2.1/GCF_007990345.1_Gossypium_hirsutum_v2.1_genomic.gff.gz"
+  Bna: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/020/379/485/GCF_020379485.1_Da-Ae/GCF_020379485.1_Da-Ae_genomic.gff.gz"
+  Cre: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/002/595/GCF_000002595.2_Chlamydomonas_reinhardtii_v5.5/GCF_000002595.2_Chlamydomonas_reinhardtii_v5.5_genomic.gff.gz"
+  Sot: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/226/075/GCF_000226075.1_SolTub_3.0/GCF_000226075.1_SolTub_3.0_genomic.gff.gz"
+  Osi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/433/935/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.gff.gz"
+  Cit: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/022/201/045/GCF_022201045.2_DVS_A1.0/GCF_022201045.2_DVS_A1.0_genomic.gff.gz"
+  Bdi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/005/505/GCF_000005505.3_Brachypodium_distachyon_v3.0/GCF_000005505.3_Brachypodium_distachyon_v3.0_genomic.gff.gz"
+  Nta: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/715/075/GCF_000715075.1_ASM71507v2/GCF_000715075.1_ASM71507v2_genomic.gff.gz"
+  Ath: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/735/GCF_000001735.4_TAIR10.1/GCF_000001735.4_TAIR10.1_genomic.gff.gz"
+  Bra: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/309/985/GCF_000309985.2_CAAS_Brap_v3.01/GCF_000309985.2_CAAS_Brap_v3.01_genomic.gff.gz"
+  Gma: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/004/515/GCF_000004515.6_Glycine_max_v4.0/GCF_000004515.6_Glycine_max_v4.0_genomic.gff.gz"
+  Mtr: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/003/473/485/GCF_003473485.1_MtrunA17r5.0-ANR/GCF_003473485.1_MtrunA17r5.0-ANR_genomic.gff.gz"
+  Osa: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/433/935/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.gff.gz"
+  Ppo: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/002/775/GCF_000002775.4_Pop_tri_v3/GCF_000002775.4_Pop_tri_v3_genomic.gff.gz"
+  Sly: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/188/115/GCF_000188115.5_SL3.1/GCF_000188115.5_SL3.1_genomic.gff.gz"
+  Vvi: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/003/745/GCF_000003745.3_12X/GCF_000003745.3_12X_genomic.gff.gz"
+  Zma: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/902/167/145/GCF_902167145.1_Zm-B73-REFERENCE-NAM-5.0/GCF_902167145.1_Zm-B73-REFERENCE-NAM-5.0_genomic.gff.gz"
   Tae: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/018/294/505/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1_genomic.gff.gz"
+  Hvu: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/904/849/725/GCF_904849725.1_MorexV3_pseudomolecules_assembly/GCF_904849725.1_MorexV3_pseudomolecules_assembly_genomic.gff.gz"
+
 
 # path of the metadata database
 metadataDB: "srainfo.sqlite3"
 
 # list of target organisms' ID
 species_id:
+  - Sbi
+  - Ghi
+  - Bna
+  - Cre
+  - Sot
+  - Osi
+  - Cit
+  - Bdi
+  - Nta
+  - Ath
+  - Bra
+  - Gma
+  - Mtr
+  - Osa
+  - Ppo
+  - Sly
+  - Vvi
+  - Zma
   - Tae
+  - Hvu
 
 taxonomy_id:
+  - 4558
+  - 3635
+  - 3708
+  - 3055
+  - 4113
+  - 39946
+  - 2711
+  - 15368
+  - 4097
+  - 3702
+  - 3711
+  - 3847
+  - 3880
+  - 39947
+  - 3694
+  - 4081
+  - 29760
+  - 4577
   - 4565
+  - 4513
 
 # list of NG words to filter SRA run/study
 NG_words: ["platform", "mix", "agilent", "technolog", "labeling", "Polysome", "polysome", "small RNA"]

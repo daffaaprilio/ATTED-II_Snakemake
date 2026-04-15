@@ -1,9 +1,6 @@
-# ------------------------------------------------------------
-# BEFORE RUNNING SNAKEMAKE
-# Don't forget to activate the "atted" conda environment
 
-# directory to store the output files
-wdir: /home/daffa/Work/2025/11-ATTED-II_ver-13.0
+# date when accessing KEGG FTP
+date_suffix: 2026-04-08
 
 # list of target organisms' ID
 species_id:
@@ -53,5 +50,3 @@ taxonomy_id:
 genes_ko_list_download: https://ftp.kegg.net/kegg/genes/links/genes_ko.list.gz
 genes_pathway_list_download: https://ftp.kegg.net/kegg/genes/links/genes_pathway.list.gz
 genes_id_download: https://ftp.kegg.net/kegg/genes/links/genes_ncbi-geneid.list.gz
-
-date_suffix: 2026-04-08

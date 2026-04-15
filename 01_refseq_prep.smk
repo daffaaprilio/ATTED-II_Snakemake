@@ -1,6 +1,8 @@
 #------------------------------------------------------------
 # Load configuration
 configfile: 'config/data_preparation.yaml'
+configfile: 'config/secrets.yaml'
+
 
 SPECIES_LIST = config['species_id']
 TAXID_LIST = config['taxonomy_id']
