@@ -40,6 +40,11 @@ snakemake -s 01_refseq_prep.smk -c 1
 `-c`: number of CPU cores <br>
 `-j`: number of concurrent jobs <br>
 
+### Evaluation Data Preparation
+```shell
+snakemake -s 05_eval_prep.smk -c 1 -p
+```
+This is to prepare all scripts/input files specific for the evaluation steps. Please do this before proceeding to the coexpression calculation. Since the coexpression calculation script wraps all steps (including the evaluation) together.
 
 ### Preparing Input Files for Coexpression Calculation
 ```shell
@@ -63,15 +68,38 @@ snakemake -s 04_coex_calc_prep.smk --config species_id='Hvu' taxonomy_id=4513 -c
 # Union case: Xxx-u
 snakemake -s 04_union_coex_calc_prep.smk --config species_id='Xxx' taxonomy_id=1111 -c 1
 ```
+#### Special cases
+Additional parameters for wheat (`Tae-r`):
+```python
+rule combat_pca:
+    params:
+        pca = PCA_TYPE
+        min_mean = 45 # change filtering option for wheat
+    input:
+        f"{WDIR}/refseq/{cutSP}-r_SpeciesSpecific2EGI",
+        f"{WDIR}/blacklist-run",
+        f"{WDIR}/srainfo-study_table.txt"
+    output:
+        f"{SPECIES_DIR}/list.txt",
+        f"{SPECIES_DIR}/key",
+        f"{SPECIES_DIR}/gc.d/1.gc",
+        f"{SPECIES_DIR}/paste.expression.combat",
+        f"{SPECIES_DIR}/pca_loadings.txt"
+    log:
+        f"{SPECIES_DIR}/logs/combat_pca.{LOG_DATETIME}.log"
+    shell: # apply the change here as well
+        '''
+        cd {WDIR}
+        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.SGI2EGI.R -s {SP} -p {params.pca} -l {params.min_mean} -> {log} 2>&1
+        '''
+```
 For each snakemake, this will create a species directory, i.e., `Ath-u/`, `Ath-r/`, `Sbi-r/`, etc. (*Arabidopsis thaliana* union, RNA-based, and *Sorghum bicolor* RNA-based gene co-expression calculation, respectively).
 ```shell
 # go to species directory
 cd Hvu-r/
 # then, run the Snakefile inside
-Snakemake -s run.smk
+snakemake -s run.smk -n -c 1
 ```
-
-### Evaluation Data Preparation
-```shell
-snakemake -s 05_eval_prep.smk -c 1 -p
-```
+> Note when running coexpression calculation <br>
+> Before running the `subagging_coexpression` rule, make sure to set `ulimit -s unlimited` on the terminal. <br>
+> If you run it on a separate screen session, then set `ulimit -s unlimited` on that screen, before running the snakemake. This is to prevent segmentation fault when running the coexpression calculation script (`79m_logit_mrgeo.Xxx-x.vDD-MM.P12345-S123.combat_pca.subagging`)
