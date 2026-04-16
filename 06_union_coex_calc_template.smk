@@ -1,6 +1,6 @@
 from datetime import datetime
 
-WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
+WDIR = config['wdir']
 cutSP = config['species_id']
 TAXONOMY_ID = config['taxonomy_id']
 
@@ -11,7 +11,7 @@ SP = f"{cutSP}-u{REP_NO}"
 SPECIES_DIR = f"{WDIR}/{SP}"
 
 # step specific synonyms
-KEGG_ftp_date = "2025-12-15"
+KEGG_ftp_date = "2026-04-08"
 EVAL_DATE = datetime.now().strftime('%Y-%m-%d')
 LOG_DATETIME = datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -30,7 +30,7 @@ rule unionizing:
     output:
         UNION_GENE_DIR
     log:
-        f"{SPECIES_DIR}/logs/unionizing.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.unionizing.log"
     shell:
         '''
         exec > {log} 2>&1
@@ -51,7 +51,7 @@ rule evaluation:
     output:
         EVAL_OUTPUT
     log:
-        f"{SPECIES_DIR}/logs/evaluation.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.evaluation.log"
     shell:
         '''
         exec > {log} 2>&1

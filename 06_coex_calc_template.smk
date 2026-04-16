@@ -50,7 +50,7 @@ rule combat_pca:
         f"{SPECIES_DIR}/paste.expression.combat",
         f"{SPECIES_DIR}/pca_loadings.txt"
     log:
-        f"{SPECIES_DIR}/logs/combat_pca.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.combat_pca.log"
     shell:
         '''
         cd {WDIR}
@@ -64,7 +64,7 @@ rule create_id_title:
     output:
         f"{SPECIES_DIR}/id-id-title.txt"
     log:
-        f"{SPECIES_DIR}/logs/create_id_title.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.create_id_title.log"
     shell:
         '''
         cd {WDIR}
@@ -79,7 +79,7 @@ rule create_info:
         f"{SPECIES_DIR}/study_info.txt",
         f"{SPECIES_DIR}/run_info.txt"
     log:
-        f"{SPECIES_DIR}/logs/create_info.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.create_info.log"
     shell:
         '''
         cd {WDIR}
@@ -95,7 +95,7 @@ rule selecting:
         f"{SPECIES_DIR}/pc_select_run.txt",
         f"{SPECIES_DIR}/pc_select_exp.txt"
     log:
-        f"{SPECIES_DIR}/logs/selecting.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.selecting.log"
     shell:
         '''
         cd {WDIR}
@@ -109,7 +109,7 @@ rule formatting:
         f"{SPECIES_DIR}/04.table.txt",
         f"{SPECIES_DIR}/04.url.txt"
     log:
-        f"{SPECIES_DIR}/logs/formatting.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.formatting.log"
     shell:
         '''
         cd {SPECIES_DIR}
@@ -125,7 +125,7 @@ rule binary_expression:
     output:
         temp(f"{SPECIES_DIR}/.binary_expression_marker")
     log:
-        f"{SPECIES_DIR}/logs/binary_expression.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.binary_expression.log"
     shell:
         '''
         cd {WDIR}
@@ -139,7 +139,7 @@ rule key_pair:
     output:
         f"{SPECIES_DIR}/key_pair"
     log:
-        f"{SPECIES_DIR}/logs/key_pair.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.key_pair.log"
     shell:
         '''
         cd {SPECIES_DIR}
@@ -156,7 +156,7 @@ rule subagging_coexpression:
     output:
         protected(f"{SPECIES_DIR}/subagging.logitMR.ave_{SUBAGGING_AVE}")
     log:
-        f"{SPECIES_DIR}/logs/subagging_coexpression.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.subagging_coexpression.log"
     shell:
         '''
         cd {SPECIES_DIR}
@@ -171,7 +171,7 @@ rule z_scoring:
         directory(f"{SPECIES_DIR}/nlmr.d"),
         directory(f"{SPECIES_DIR}/nlmr.d.beforezscore")
     log:
-        f"{SPECIES_DIR}/logs/z_scoring.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.z_scoring.log"
     shell:
         '''
         exec > {log} 2>&1
@@ -205,7 +205,7 @@ rule evaluation:
     output:
         EVAL_OUTPUT
     log:
-        f"{SPECIES_DIR}/logs/evaluation.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.evaluation.log"
     shell:
         '''
         cd {SPECIES_DIR}

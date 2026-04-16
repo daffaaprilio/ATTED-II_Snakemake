@@ -1,6 +1,6 @@
 from datetime import datetime
 
-WDIR = "/home/daffa/Work/2025/11-ATTED-II_ver-13.0"
+WDIR = config['wdir']
 cutSP = 'Ath'
 TAXONOMY_ID = 3702
 
@@ -19,7 +19,7 @@ PCA_TYPE = "double"
 SUBAGGING_AVE = config.get('subagging_ave', '') if config.get('subagging_ave', '') else 1000
 VALID_NUM = config.get('valid_num', '') if config.get('valid_num', '') else 1000
 SAMPLING_RATE = config.get('sampling_rate', '') if config.get('sampling_rate', '') else 50
-KEGG_ftp_date = "2025-12-15"
+KEGG_ftp_date = "2026-04-08"
 EVAL_DATE = datetime.now().strftime('%Y-%m-%d')
 LOG_DATETIME = datetime.now().strftime('%Y%m%d_%H%M%S')
 EVAL_CORE_OUTPUT = f"{SPECIES_DIR}/score.KEGG50.KEGG.{KEGG_ftp_date}.{SP}.core.{EVAL_DATE}"
@@ -53,7 +53,7 @@ rule attrib_info:
     output:
         f"{SPECIES_DIR}/ecotype.study"
     log:
-        f"{SPECIES_DIR}/logs/attrib_info.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.attrib_info.log"
     shell:
         '''
         exec > {log} 2>&1
@@ -80,7 +80,7 @@ rule combat_pca:
         f"{SPECIES_DIR}/pca_loadings_ecotype.txt",
         f"{SPECIES_DIR}/pca_loadings_core.txt"
     log:
-        f"{SPECIES_DIR}/logs/combat_pca.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.combat_pca.log"
     shell:
         '''
         cd {WDIR}
@@ -99,7 +99,7 @@ rule loading_annotation_prep:
         f"{SPECIES_CORE_DIR}/pca_loadings.txt",
         f"{SPECIES_ECO_DIR}/pca_loadings.txt"
     log:
-        f"{SPECIES_DIR}/logs/loading_annotation_prep.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.loading_annotation_prep.log"
     shell:
         '''
         exec > {log} 2>&1
@@ -122,7 +122,7 @@ rule create_id_title:
         f"{SPECIES_CORE_DIR}/id-id-title.txt",
         f"{SPECIES_ECO_DIR}/id-id-title.txt"
     log:
-        f"{SPECIES_DIR}/logs/create_id_title.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.create_id_title.log"
     shell:
         '''
         cd {WDIR}
@@ -141,7 +141,7 @@ rule create_info:
         f"{SPECIES_ECO_DIR}/study_info.txt",
         f"{SPECIES_ECO_DIR}/run_info.txt"
     log:
-        f"{SPECIES_DIR}/logs/create_info.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.create_info.log"
     shell:
         '''
         cd {WDIR}
@@ -163,7 +163,7 @@ rule selecting:
         f"{SPECIES_CORE_DIR}/pc_select_run.txt",
         f"{SPECIES_CORE_DIR}/pc_select_exp.txt"
     log:
-        f"{SPECIES_DIR}/logs/selecting.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.selecting.log"
     shell:
         '''
         cd {WDIR}
@@ -181,7 +181,7 @@ rule formatting:
         f"{SPECIES_CORE_DIR}/04.table.txt",
         f"{SPECIES_CORE_DIR}/04.url.txt"
     log:
-        f"{SPECIES_DIR}/logs/formatting.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.formatting.log"
     shell:
         '''
         cd {SPECIES_ECO_DIR}
@@ -200,7 +200,7 @@ rule binary_expression:
     output:
         temp(f"{SPECIES_DIR}/.binary_expression_marker")
     log:
-        f"{SPECIES_DIR}/logs/binary_expression.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.binary_expression.log"
     shell:
         '''
         cd {WDIR}
@@ -215,7 +215,7 @@ rule key_pair:
     output:
         f"{SPECIES_DIR}/key_pair"
     log:
-        f"{SPECIES_DIR}/logs/key_pair.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.key_pair.log"
     shell:
         '''
         cd {SPECIES_DIR}
@@ -233,7 +233,7 @@ rule subagging_coexpression:
         protected(f"{SPECIES_DIR}/subagging.ecotype.logitMR.ave_{SUBAGGING_AVE}"),
         protected(f"{SPECIES_DIR}/subagging.core.logitMR.ave_{SUBAGGING_AVE}")
     log:
-        f"{SPECIES_DIR}/logs/subagging_coexpression.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.subagging_coexpression.log"
     shell:
         '''
         cd {SPECIES_DIR}
@@ -252,7 +252,7 @@ rule z_scoring:
         directory(f"{SPECIES_DIR}/nlmr.d.core"),
         directory(f"{SPECIES_DIR}/nlmr.d.core.beforezscore")
     log:
-        f"{SPECIES_DIR}/logs/z_scoring.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.z_scoring.log"
     shell:
         '''
         exec > {log} 2>&1
@@ -308,7 +308,7 @@ rule evaluation:
         output_ecotype = EVAL_ECOTYPE_OUTPUT,
         output_core = EVAL_CORE_OUTPUT
     log:
-        f"{SPECIES_DIR}/logs/evaluation.{LOG_DATETIME}.log"
+        f"{SPECIES_DIR}/logs/{LOG_DATETIME}.evaluation.log"
     shell:
         '''
         cd {SPECIES_DIR}
