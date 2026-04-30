@@ -90,7 +90,7 @@ rule combat_pca:
     shell: # apply the change here as well
         '''
         cd {WDIR}
-        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.SGI2EGI.R -s {SP} -p {params.pca} -l {params.min_mean} -> {log} 2>&1
+        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.SGI2EGI.R -s {SP} -p {params.pca} -l {params.min_mean} > {log} 2>&1
         '''
 ```
 For each snakemake, this will create a species directory, i.e., `Ath-u/`, `Ath-r/`, `Sbi-r/`, etc. (*Arabidopsis thaliana* union, RNA-based, and *Sorghum bicolor* RNA-based gene co-expression calculation, respectively).
