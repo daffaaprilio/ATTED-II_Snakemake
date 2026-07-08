@@ -1,1 +1,32 @@
+# Local secrets
 config/secrets.yaml
+
+# Tooling
+.snakemake/
+.cursor/
+
+# Generated data (symlink → HDD wdir)
+tmp/
+refseq/
+index/
+output/
+output_tmp/
+list/
+logs/
+Eval/
+
+# Metadata (external DB / pipeline outputs)
+srainfo.sqlite3
+srainfo-study_table.txt
+study-title-NG_word.txt
+study-abstract-NG_word.txt
+blacklist-study
+blacklist-run
+
+# Coexpression output dirs
+*-r/
+*-m/
+*-u/
+
+# Separate git clone (informationbiology/RNAseq-coexpression)
+scripts/
