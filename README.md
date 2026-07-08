@@ -1,142 +1,84 @@
-# ATTED-II v13 wrapper Snakefiles
+# ATTED-II v13 Snakemake wrapper
 
-This repository, mostly consists of Snakefile scripts, is designed to simplify the operation of ATTED-II plant gene co-expression database update.
-The main scripts, i.e., the ones that 
+Snakemake orchestration for the ATTED-II gene co-expression update (v13). Calculation scripts live in [RNAseq-coexpression](https://github.com/informationbiology/RNAseq-coexpression) (Tohoku Univ. Information Biology Lab).
 
-- handle the gene expression data preparation and co-expression calculation
-- being wrapped by scripts in this repository,
+> **Original workflow** (notebook / `scripts/9-batchrun_shell/*.sh`, hardcoded paths): use [RNAseq-coexpression](https://github.com/informationbiology/RNAseq-coexpression) directly — this repo is optional.
 
-are kept and managed by the Information Biology Laboratory of Tohoku University.
+## Setup
 
-# Usage
-The scripts in this repository has been executed for the update of ATTED-II version 13.0. You can reproduce the result by following these steps below:
-
-## Environment Preparation
 ```shell
-# clone this repository
-git clone <repo-url> ATTED-II_Snakemake
+git clone https://github.com/daffaaprilio/ATTED-II_Snakemake.git ATTED-II_Snakemake
 cd ATTED-II_Snakemake
+git clone https://github.com/informationbiology/RNAseq-coexpression.git scripts
 
-# install dependencies
 conda install -n base -c conda-forge mamba -y
 mamba install -n atted -c conda-forge -c bioconda snakemake
 ```
 
-## Initial Setup
+### 1. `srainfo.sqlite3` (SRA metadata DB, not in repo)
 
-This repo is a Snakemake wrapper only. Complete these steps before running the pipeline.
+- **Reuse (recommended):** ask your lab for a shared copy on `/mnt/hdd/...`.
+- **Build (~5 days on DDBJ):** run [`p-01-qsub-create-database.sh`](https://github.com/informationbiology/RNAseq-coexpression/blob/main/0-DataPreparation/2-RNA-seq/p-01-qsub-create-database.sh) → [`x-01-create-database.py`](https://github.com/informationbiology/RNAseq-coexpression/blob/main/0-DataPreparation/2-RNA-seq/x-01-create-database.py).
 
-**1. Pipeline scripts** — clone into `scripts/`:
-
-```shell
-git clone https://github.com/informationbiology/RNAseq-coexpression.git scripts
-```
-
-**2. SRA metadata DB** — obtain `srainfo.sqlite3` from your lab (not included in this repo).
-
-**3. Local config** — create `config/secrets.yaml` (git-ignored):
+### 2. `config/secrets.yaml` (git-ignored)
 
 ```shell
-cp config/secrets.yaml.template config/secrets.yaml   # if template exists
+cp config/secrets.yaml.template config/secrets.yaml
 ```
+
+Set `wdir` to your HDD work directory (use `/mnt/hdd/YOUR_USERNAME/ATTED-II_work`, not home):
 
 ```yaml
-wdir: "/path/to/ATTED-II_work"
-kegg_ftp_user: "your_kegg_username"
-kegg_ftp_pass: "your_kegg_password"
+wdir: "/mnt/hdd/YOUR_USERNAME/ATTED-II_work"
 ```
 
-**4. Symlinks** — store large data under `wdir`, not in the repo:
+`kegg_ftp_user` / `kegg_ftp_pass` are only needed for `05_eval_prep.smk` — edit in `secrets.yaml`.
+
+### 3. Symlinks (one-time)
 
 ```shell
-export WORK="/path/to/ATTED-II_work"
-export SRAINFO_DB="/path/to/srainfo.sqlite3"
-bash scripts/setup_tool_symlinks.sh
+export WORK="/mnt/hdd/YOUR_USERNAME/ATTED-II_work"   # must match secrets.yaml wdir
+export SRAINFO_DB="/mnt/hdd/.../srainfo.sqlite3"     # actual DB path (lab shared or your build)
+bash scripts/setup_tool_symlinks.sh                  # optional
 bash scripts/setup_workdir_symlinks.sh
 ```
 
-| Location | Contents |
-|----------|----------|
-| repo root | Snakefiles, `config/` |
-| `$WORK` | `tmp/`, `refseq/`, `index/`, `output/`, `list/`, `logs/`, `Eval/`, `{Species}-r/` |
+`WORK` / `SRAINFO_DB` are only for the symlink script above. Snakemake reads `wdir` from `secrets.yaml` thereafter.
 
-## Data Preparation
-First half of the calculation is to prepare the gene expression data.
+| Path | Role |
+|------|------|
+| `~/ATTED-II_Snakemake` | Snakefiles, `config/`, symlinks |
+| `wdir` on `/mnt/hdd/` | `tmp/`, `refseq/`, `index/`, `output/`, `list/`, `logs/`, `Eval/`, `{Species}-r/` |
 
-### Reference Sequence Preparation
-Edit `config/secrets.yaml` (`wdir`) and `config/data_preparation.yaml` (species, genome URLs) before running:
+## Pipeline
+
+Edit `config/data_preparation.yaml` (species, genome URLs) before Step 1.
+
+Common flags: `-s` Snakefile, `-c` cores, `-n` dry run, `-p` print commands, `--keep-going` continue on failure. See [Snakemake docs](https://snakemake.readthedocs.io/en/stable/).
+
+| Step | Snakefile | Notes |
+|------|-----------|-------|
+| 1 Ref genome & index | `01_refseq_prep.smk` | `-c 1` |
+| 2 SRA lists & metadata | `02_data_prep.smk` | `-c 1` |
+| 3 Expression counts | `03_expression_data.smk` | per species; `-c 12` recommended (2 CPUs/Bowtie job) |
+| 5 Eval inputs | `05_eval_prep.smk` | before coexpression; needs KEGG creds in `secrets.yaml` |
+| 4 Coex prep | `04_coex_calc_prep.smk` | RNA-seq (`-r`) |
+| 4 Union prep | `04_union_coex_calc_prep.smk` | union (`-u`) |
+| 6 Coex calc | `{Species}-r/run.smk` | generated under `wdir` |
+
 ```shell
-# Run the refseq snakefile script (after setting up the conda environment and installing Snakemake there)
+# examples (species_id / taxonomy_id from data_preparation.yaml)
 snakemake -s 01_refseq_prep.smk -c 1
-```
-> About Snakemake Arguments <br>
-[Snakemake](https://snakemake.readthedocs.io/en/stable/) is used to manage the workflow steps. Several arguments used quite often: <br>
-`-n`: dry run <br>
-`-s`: specify the Snakefile path to use <br>
-`-p`: print the shell commands that will be executed for each rule <br>
-`-c`: number of CPU cores <br>
-`-j`: number of concurrent jobs <br>
-
-### Evaluation Data Preparation
-```shell
-snakemake -s 05_eval_prep.smk -c 1 -p
-```
-This is to prepare all scripts/input files specific for the evaluation steps. Please do this before proceeding to the coexpression calculation. Since the coexpression calculation script wraps all steps (including the evaluation) together.
-
-### Preparing Input Files for Coexpression Calculation
-```shell
 snakemake -s 02_data_prep.smk -c 1
-```
-Then, for each species, run this snakefile. It is important to run each snakefile individually, in order to not flood the system. Use as much cores when necessary (12 is optimal, out of 48 cores in cosmo, be advised that a Bowtie job requires 2 CPU).
-```shell
-# example for species_id='Hvu' and taxonomy_id=4513
-snakemake -s 03_expression_data.smk -c 12 --config species_id='Hvu' taxonomy_id=4513 -np --keep-going
-```
-> About `--keep-going` argument <br>
-With `--keep-going` flag, Snakemake will continue scheduling the remaining jobs even when individual ones fail.
-
-### Coexpression calculation
-Determine the calculation method: microarray (prefix: -m), RNA-seq (-r), union (-u) for each species. Consult the coexpression data table (https://atted.jp/download/) for the current list of species and each co-expression calculation prefix.
-```shell
-# RNA-based case: Hvu-r
+snakemake -s 05_eval_prep.smk -c 1 -p
+snakemake -s 03_expression_data.smk -c 12 --config species_id='Hvu' taxonomy_id=4513 --keep-going
 snakemake -s 04_coex_calc_prep.smk --config species_id='Hvu' taxonomy_id=4513 -c 1
-# Microarray case: Xxx-m
-# since there are no microarray for the recent ATTED-II update, this is not implemented
-# Union case: Xxx-u
-snakemake -s 04_union_coex_calc_prep.smk --config species_id='Xxx' taxonomy_id=1111 -c 1
+
+cd /mnt/hdd/.../ATTED-II_work/Hvu-r
+ulimit -s unlimited    # required before subagging (avoid segfault)
+snakemake -s run.smk -c 1
 ```
-#### Special cases
-Additional parameters for wheat (`Tae-r`):
-```python
-rule combat_pca:
-    params:
-        pca = PCA_TYPE
-        min_mean = 45 # change filtering option for wheat
-    input:
-        f"{WDIR}/refseq/{cutSP}-r_SpeciesSpecific2EGI",
-        f"{WDIR}/blacklist-run",
-        f"{WDIR}/srainfo-study_table.txt"
-    output:
-        f"{SPECIES_DIR}/list.txt",
-        f"{SPECIES_DIR}/key",
-        f"{SPECIES_DIR}/gc.d/1.gc",
-        f"{SPECIES_DIR}/paste.expression.combat",
-        f"{SPECIES_DIR}/pca_loadings.txt"
-    log:
-        f"{SPECIES_DIR}/logs/combat_pca.{LOG_DATETIME}.log"
-    shell: # apply the change here as well
-        '''
-        cd {WDIR}
-        Rscript {WDIR}/scripts/2-Subsampling/x-43-ComBat.RNA-seq.SGI2EGI.R -s {SP} -p {params.pca} -l {params.min_mean} > {log} 2>&1
-        '''
-```
-For each snakemake, this will create a species directory, i.e., `Ath-u/`, `Ath-r/`, `Sbi-r/`, etc. (*Arabidopsis thaliana* union, RNA-based, and *Sorghum bicolor* RNA-based gene co-expression calculation, respectively).
-```shell
-# go to species directory
-cd Hvu-r/
-# then, run the Snakefile inside
-snakemake -s run.smk -n -c 1
-```
-> Note when running coexpression calculation <br>
-> Before running the `subagging_coexpression` rule, make sure to set `ulimit -s unlimited` on the terminal. <br>
-> If you run it on a separate screen session, then set `ulimit -s unlimited` on that screen, before running the snakemake. This is to prevent segmentation fault when running the coexpression calculation script (`79m_logit_mrgeo.Xxx-x.vDD-MM.P12345-S123.combat_pca.subagging`)
+
+Prefix guide: `-r` RNA-seq, `-u` union, `-m` microarray (not implemented in v13). See [atted.jp/download](https://atted.jp/download/).
+
+**Wheat (`Tae-r`):** set `min_mean = 45` in the `combat_pca` rule of `06_coex_calc_template.smk` (params and shell `-l` flag).
