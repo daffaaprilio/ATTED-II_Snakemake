@@ -82,21 +82,6 @@ Keep code in the git repo; keep generated data on HDD (`wdir`):
 
 Example: `wdir: "/mnt/hdd/USER/ATTED-II_work"` in `config/secrets.yaml`.
 
-### Adding a new species (e.g. mouse)
-
-1. Add entries to `config/data_preparation.yaml` and `config/eval_preparation.yaml`:
-   - `species_id` (e.g. `Mmu`), `taxonomy_id` (e.g. `10090`)
-   - `download_refgen_dict` / `download_annot_dict` URLs
-2. For species with very large SRA catalogs, cap the run list in `config/data_preparation.yaml`:
-
-```yaml
-list_creation_per_taxonomy:
-  10090:              # Mus musculus
-    max_run_in_study: 50
-    min_run_in_study: 3
-    random_select: 500   # adjust for test vs production
-```
-
 3. Run per species (test with a small subset first):
 
 ```shell
