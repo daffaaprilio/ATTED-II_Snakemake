@@ -9,15 +9,24 @@ TAXONOMY_ID = config['taxonomy_id']
 NG_WORDS = config['NG_words']
 WDIR = config['wdir']
 
+LIST_DEFAULTS = config.get('list_creation_defaults', {})
+LIST_PER_TAX = {str(k): v for k, v in config.get('list_creation_per_taxonomy', {}).items()}
+
+def get_list_param(taxid, key, fallback):
+    taxid = str(taxid)
+    if taxid in LIST_PER_TAX and key in LIST_PER_TAX[taxid]:
+        return LIST_PER_TAX[taxid][key]
+    return LIST_DEFAULTS.get(key, fallback)
+
 DATE = datetime.datetime.now().strftime('%Y%m%d')
 
 #------------------------------------------------------------
 # STEP 1: assigning working directory & database path
 METADATADB = f'{WDIR}/srainfo.sqlite3'
 
-# STEP 2: list creation (single species)
-TAXID_LIST_FILE = f'{WDIR}/list/{{taxonomy_id}}-list.txt'
-TAXID_PREFETCH_LIST_FILE = f'{WDIR}/list/{{taxonomy_id}}-prefetch_list.txt'
+# STEP 2: list creation (single species; relative paths for Snakemake targets)
+TAXID_LIST_FILE = 'list/{taxonomy_id}-list.txt'
+TAXID_PREFETCH_LIST_FILE = 'list/{taxonomy_id}-prefetch_list.txt'
 ## lists creation (expanded across all target organisms)
 ALL_LIST_FILES = expand(TAXID_LIST_FILE, taxonomy_id=TAXONOMY_ID)
 ALL_PREFETCH_LIST_FILES = expand(TAXID_PREFETCH_LIST_FILE, taxonomy_id=TAXONOMY_ID)
@@ -63,8 +72,9 @@ rule create_list:
         metadataDB = METADATADB
     params:
         wdir = WDIR,
-        max_run_in_study = 100000,
-        min_run_in_study = 10,
+        max_run_in_study = lambda wc: get_list_param(wc.taxonomy_id, 'max_run_in_study', 100000),
+        min_run_in_study = lambda wc: get_list_param(wc.taxonomy_id, 'min_run_in_study', 10),
+        random_select = lambda wc: get_list_param(wc.taxonomy_id, 'random_select', 0),
         shuffle = True,
         run_list = True,
         ftp_ddbj = True
@@ -76,7 +86,7 @@ rule create_list:
     shell:
         '''
         exec 1> >(tee -a {log}) 2>&1
-        python3 {input.cmd} --taxonomy-id {wildcards.taxonomy_id} --database {input.metadataDB} --output {params.wdir} --max-run-in-study {params.max_run_in_study} --min-run-in-study {params.min_run_in_study} --shuffle --run-list --ftp-ddbj
+        python3 {input.cmd} --taxonomy-id {wildcards.taxonomy_id} --database {input.metadataDB} --output {params.wdir} --max-run-in-study {params.max_run_in_study} --min-run-in-study {params.min_run_in_study} --random-select {params.random_select} --shuffle --run-list --ftp-ddbj
         '''
         
 rule create_study_table:

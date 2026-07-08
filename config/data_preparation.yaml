@@ -95,3 +95,15 @@ taxonomy_id:
 
 # list of NG words to filter SRA run/study
 NG_words: ["platform", "mix", "agilent", "technolog", "labeling", "Polysome", "polysome", "small RNA"]
+
+# SRA list generation defaults (Step 02)
+list_creation_defaults:
+  max_run_in_study: 100000
+  min_run_in_study: 10
+  random_select: 0
+
+# Per-species overrides (random_select: cap total runs; max_run_in_study: exclude huge studies)
+list_creation_per_taxonomy: {}
+
+# Optional cap when running Step 03 (0 = use full list)
+expression_max_runs: {}
