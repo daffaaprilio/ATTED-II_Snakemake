@@ -28,8 +28,8 @@ ANNOT_FILES = {species: get_filename(url) for species, url in DOWNLOAD_ANNOT_DIC
 #------------------------------------------------------------
 # Specifying directory path
 
-REFSEQ_DIR = '{WDIR}/refseq'
-INDEX_DIR = '{WDIR}/index'
+REFSEQ_DIR = 'refseq'
+INDEX_DIR = 'index'
 
 #------------------------------------------------------------
 # Specifying single file input
@@ -79,7 +79,7 @@ rule bowtie_index:
         lambda wildcards: f"{REFSEQ_DIR}/{[species for species, taxid in SPECIES_TO_TAXID.items() if str(taxid) == wildcards.taxid][0]}_gene_seq"
     output:
         # expand(INDEX_DIR + "/{{taxid}}.{ext}", ext=['1.bt2','2.bt2','3.bt2','4.bt2','rev.1.bt2','rev.2.bt2'])
-        INDEX_DIR + "/{{taxid}}.done"
+        INDEX_DIR + "/{taxid}.done"
     shell:
         '''
         bowtie2-build -f {input} {INDEX_DIR}/{wildcards.taxid}
