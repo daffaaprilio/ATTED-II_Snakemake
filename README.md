@@ -14,20 +14,105 @@ The scripts in this repository has been executed for the update of ATTED-II vers
 ## Environment Preparation
 ```shell
 # clone this repository
-git clone
+git clone <repo-url> ATTED-II_Snakemake
+cd ATTED-II_Snakemake
 
 # install dependencies
 conda install -n base -c conda-forge mamba -y
-mamba install -n atted -c conda-forge -c bioconda snakemake 
+mamba install -n atted -c conda-forge -c bioconda snakemake
 ```
+
+## Initial Setup
+
+This repository is a **Snakemake wrapper** only. Before running any step, prepare the following dependencies.
+
+### 1. Pipeline scripts (`scripts/`)
+
+Clone the main pipeline repository into `scripts/` (not included in this repo):
+
+```shell
+git clone https://github.com/informationbiology/RNAseq-coexpression.git scripts
+```
+
+### 2. SRA metadata database (`srainfo.sqlite3`)
+
+`srainfo.sqlite3` is an external SQLite database used for SRA list generation (Step 02). It is **not** distributed with this repository. Obtain it from your lab or an existing ATTED-II installation, then point to it when running the setup script (see step 4).
+
+### 3. Local config (`config/secrets.yaml`)
+
+Create `config/secrets.yaml` (git-ignored). If `config/secrets.yaml.template` is present, copy it first:
+
+```shell
+cp config/secrets.yaml.template config/secrets.yaml
+```
+
+Example contents:
+
+```yaml
+wdir: "/path/to/ATTED-II_work"   # large data on HDD recommended
+kegg_ftp_user: "your_kegg_username"
+kegg_ftp_pass: "your_kegg_password"
+```
+
+`wdir` is read by Snakefiles 01–05. KEGG credentials are used in Step 05 only.
+
+### 4. Workdir symlinks
+
+Large outputs (`tmp/`, `refseq/`, `index/`, `output/`, `list/`, `logs/`, etc.) should live under `wdir`, not in the home repo. Run once after editing `secrets.yaml`:
+
+```shell
+# optional: override paths
+export WORK="/path/to/ATTED-II_work"
+export SRAINFO_DB="/path/to/srainfo.sqlite3"
+
+bash scripts/setup_tool_symlinks.sh      # fastq-dump etc.
+bash scripts/setup_workdir_symlinks.sh   # repo <-> wdir symlinks + srainfo.sqlite3
+```
+
+After setup, the repo root contains symlinks (e.g. `output/`, `list/`) that resolve to `$WORK`.
+
+### HDD layout
+
+Keep code in the git repo; keep generated data on HDD (`wdir`):
+
+| Location | Contents |
+|----------|----------|
+| `ATTED-II_Snakemake/` (repo) | Snakefiles, `config/` |
+| `$WORK` (`wdir`) | `tmp/`, `refseq/`, `index/`, `output/`, `list/`, `logs/`, `Eval/`, `{Species}-r/` |
+
+Example: `wdir: "/mnt/hdd/USER/ATTED-II_work"` in `config/secrets.yaml`.
+
+### Adding a new species (e.g. mouse)
+
+1. Add entries to `config/data_preparation.yaml` and `config/eval_preparation.yaml`:
+   - `species_id` (e.g. `Mmu`), `taxonomy_id` (e.g. `10090`)
+   - `download_refgen_dict` / `download_annot_dict` URLs
+2. For species with very large SRA catalogs, cap the run list in `config/data_preparation.yaml`:
+
+```yaml
+list_creation_per_taxonomy:
+  10090:              # Mus musculus
+    max_run_in_study: 50
+    min_run_in_study: 3
+    random_select: 500   # adjust for test vs production
+```
+
+3. Run per species (test with a small subset first):
+
+```shell
+snakemake -s 03_expression_data.smk -c 4 \
+  --config species_id='Mmu' taxonomy_id=10090 max_runs=5 --keep-going
+```
+
+Omit `max_runs` for a full run using the capped list.
 
 ## Data Preparation
 First half of the calculation is to prepare the gene expression data.
 
 ### Reference Sequence Preparation
-Make sure to check the config file `config/data_preparation.yaml` to:
-- Set your working directory
-- Include the species whose gene co-expression data is going to be calculated into the config file (link to download reference genome, annotation, species abbreviation, and taxonomy ID)
+Make sure to check the config files before running:
+- `config/secrets.yaml` — set `wdir` (working directory for generated data)
+- `config/data_preparation.yaml` — add target species (reference genome URL, annotation URL, species ID, taxonomy ID)
 ```shell
 # Run the refseq snakefile script (after setting up the conda environment and installing Snakemake there)
 snakemake -s 01_refseq_prep.smk -c 1
