@@ -24,80 +24,47 @@ mamba install -n atted -c conda-forge -c bioconda snakemake
 
 ## Initial Setup
 
-This repository is a **Snakemake wrapper** only. Before running any step, prepare the following dependencies.
+This repo is a Snakemake wrapper only. Complete these steps before running the pipeline.
 
-### 1. Pipeline scripts (`scripts/`)
-
-Clone the main pipeline repository into `scripts/` (not included in this repo):
+**1. Pipeline scripts** — clone into `scripts/`:
 
 ```shell
 git clone https://github.com/informationbiology/RNAseq-coexpression.git scripts
 ```
 
-### 2. SRA metadata database (`srainfo.sqlite3`)
+**2. SRA metadata DB** — obtain `srainfo.sqlite3` from your lab (not included in this repo).
 
-`srainfo.sqlite3` is an external SQLite database used for SRA list generation (Step 02). It is **not** distributed with this repository. Obtain it from your lab or an existing ATTED-II installation, then point to it when running the setup script (see step 4).
-
-### 3. Local config (`config/secrets.yaml`)
-
-Create `config/secrets.yaml` (git-ignored). If `config/secrets.yaml.template` is present, copy it first:
+**3. Local config** — create `config/secrets.yaml` (git-ignored):
 
 ```shell
-cp config/secrets.yaml.template config/secrets.yaml
+cp config/secrets.yaml.template config/secrets.yaml   # if template exists
 ```
 
-Example contents:
-
 ```yaml
-wdir: "/path/to/ATTED-II_work"   # large data on HDD recommended
+wdir: "/path/to/ATTED-II_work"
 kegg_ftp_user: "your_kegg_username"
 kegg_ftp_pass: "your_kegg_password"
 ```
 
-`wdir` is read by Snakefiles 01–05. KEGG credentials are used in Step 05 only.
-
-### 4. Workdir symlinks
-
-Large outputs (`tmp/`, `refseq/`, `index/`, `output/`, `list/`, `logs/`, etc.) should live under `wdir`, not in the home repo. Run once after editing `secrets.yaml`:
+**4. Symlinks** — store large data under `wdir`, not in the repo:
 
 ```shell
-# optional: override paths
 export WORK="/path/to/ATTED-II_work"
 export SRAINFO_DB="/path/to/srainfo.sqlite3"
-
-bash scripts/setup_tool_symlinks.sh      # fastq-dump etc.
-bash scripts/setup_workdir_symlinks.sh   # repo <-> wdir symlinks + srainfo.sqlite3
+bash scripts/setup_tool_symlinks.sh
+bash scripts/setup_workdir_symlinks.sh
 ```
-
-After setup, the repo root contains symlinks (e.g. `output/`, `list/`) that resolve to `$WORK`.
-
-### HDD layout
-
-Keep code in the git repo; keep generated data on HDD (`wdir`):
 
 | Location | Contents |
 |----------|----------|
-| `ATTED-II_Snakemake/` (repo) | Snakefiles, `config/` |
-| `$WORK` (`wdir`) | `tmp/`, `refseq/`, `index/`, `output/`, `list/`, `logs/`, `Eval/`, `{Species}-r/` |
-
-Example: `wdir: "/mnt/hdd/USER/ATTED-II_work"` in `config/secrets.yaml`.
-
-3. Run per species (test with a small subset first):
-
-```shell
-snakemake -s 03_expression_data.smk -c 4 \
-  --config species_id='Mmu' taxonomy_id=10090 max_runs=5 --keep-going
-```
-
-Omit `max_runs` for a full run using the capped list.
+| repo root | Snakefiles, `config/` |
+| `$WORK` | `tmp/`, `refseq/`, `index/`, `output/`, `list/`, `logs/`, `Eval/`, `{Species}-r/` |
 
 ## Data Preparation
 First half of the calculation is to prepare the gene expression data.
 
 ### Reference Sequence Preparation
-Make sure to check the config files before running:
-- `config/secrets.yaml` — set `wdir` (working directory for generated data)
-- `config/data_preparation.yaml` — add target species (reference genome URL, annotation URL, species ID, taxonomy ID)
+Edit `config/secrets.yaml` (`wdir`) and `config/data_preparation.yaml` (species, genome URLs) before running:
 ```shell
 # Run the refseq snakefile script (after setting up the conda environment and installing Snakemake there)
 snakemake -s 01_refseq_prep.smk -c 1
